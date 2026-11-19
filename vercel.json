@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/verify", "destination": "/verify.html" },
+    { "source": "/student/dashboard", "destination": "/dashboard.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/student", "destination": "/dashboard.html" },
+    { "source": "/organiser/dashboard", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/events", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/create", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/registrations", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/attendees", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/tickets", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/analytics", "destination": "/organiser-dashboard.html" },
+    { "source": "/organiser/profile", "destination": "/organiser-dashboard.html" },
+    { "source": "/student/login", "destination": "/auth.html" },
+    { "source": "/student/signup", "destination": "/auth.html" },
+    { "source": "/student/forgot-password", "destination": "/auth.html" },
+    { "source": "/organiser/login", "destination": "/auth.html" },
+    { "source": "/organiser/signup", "destination": "/auth.html" },
+    { "source": "/organiser/forgot-password", "destination": "/auth.html" },
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/login", "destination": "/auth.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

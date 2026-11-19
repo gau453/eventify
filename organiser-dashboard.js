@@ -4,6 +4,60 @@
  * live camera ticket scanner, registration rosters, QR admission gate, and analytics.
  */
 
+// Universal Fetch Auth Interceptor: transparently passes JWT Bearer token & headers to /api/
+(function setupOrganiserAuthFetch() {
+  if (window._organiserAuthFetchConfigured) return;
+  window._organiserAuthFetchConfigured = true;
+  const _fetch = window.fetch;
+  window.fetch = function(input, init) {
+    init = init || {};
+    const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+    if (typeof url === 'string' && (url.startsWith('/api/') || url.includes('/api/'))) {
+      const token = localStorage.getItem('eventify_token');
+      const userRaw = localStorage.getItem('eventify_user');
+      init.headers = init.headers || {};
+      if (init.headers instanceof Headers) {
+        if (token && !init.headers.has('Authorization')) {
+          init.headers.set('Authorization', 'Bearer ' + token);
+        }
+        if (userRaw) {
+          try {
+            const u = JSON.parse(userRaw);
+            if (u.email && !init.headers.has('X-Organiser-Email')) {
+              init.headers.set('X-Organiser-Email', u.email);
+            }
+          } catch(e) {}
+        }
+      } else if (Array.isArray(init.headers)) {
+        if (token && !init.headers.some(([k]) => k.toLowerCase() === 'authorization')) {
+          init.headers.push(['Authorization', 'Bearer ' + token]);
+        }
+        if (userRaw) {
+          try {
+            const u = JSON.parse(userRaw);
+            if (u.email && !init.headers.some(([k]) => k.toLowerCase() === 'x-organiser-email')) {
+              init.headers.push(['X-Organiser-Email', u.email]);
+            }
+          } catch(e) {}
+        }
+      } else {
+        if (token && !init.headers['Authorization'] && !init.headers['authorization']) {
+          init.headers['Authorization'] = 'Bearer ' + token;
+        }
+        if (userRaw) {
+          try {
+            const u = JSON.parse(userRaw);
+            if (u.email && !init.headers['X-Organiser-Email'] && !init.headers['x-organiser-email']) {
+              init.headers['X-Organiser-Email'] = u.email;
+            }
+          } catch(e) {}
+        }
+      }
+    }
+    return _fetch.call(this, input, init);
+  };
+})();
+
 let currentOrganiserUser = null;
 let allEvents = [];
 let allRegistrations = [];
