@@ -1,0 +1,31 @@
+[
+  {
+    "id": "usr_student_1",
+    "role": "student",
+    "email": "student@campus.edu",
+    "name": "Alex Johnson",
+    "college": "TechVerse University",
+    "passwordHash": "fcb61e00096e80bbb3741ecae0a3b92a:71302d1ad9a4b8818fe986644ab004994f437d42e4fa02e82f5f2ae8fefe1441317a50f19e0821dcdc1042aeccd0aa4b60175e94df08d29dc24cccc1e2825d46",
+    "createdAt": "2026-11-19T15:51:16.664Z"
+  },
+  {
+    "id": "usr_organiser_1",
+    "role": "organiser",
+    "email": "organiser@campus.edu",
+    "name": "Sarah Chen",
+    "organisation": "TechNova Club",
+    "phone": "+1 (555) 234-5678",
+    "passwordHash": "ca9c7e90a765b8a501cbcb8a7bc49307:b892b7b1bd937039f9bd2c09a14bb5a49589ffd29f52b4e7b08363d2400c65e7b6dd7e66aa45366c48bc79e0e04a7f26fe36c36e30a6c2f6448ce9e779120f40",
+    "createdAt": "2026-11-19T15:51:16.763Z"
+  },
+  {
+    "id": "org_1795122201339_14618e67",
+    "role": "organiser",
+    "name": "Gautam",
+    "organisation": "dsu",
+    "email": "gautam453m@gmail.com",
+    "phone": "+91 874758745",
+    "passwordHash": "c8cbfcc7de03642b7d16b245ce26c3e1:dda12183cbec0e3253b165ba82b5e0bcc14f8e2659c0ae3bfed25599d3ef2255450fbcaea687cffd9e788a2227a3733d64b3b0e7771750fc658b5624c8df8249",
+    "createdAt": "2026-11-19T21:03:21.469Z"
+  }
+]

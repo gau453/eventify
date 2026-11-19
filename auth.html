@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventify — Authentication Portal</title>
+  <meta name="description" content="Student and Organiser Authentication for Eventify. Discover college events, register for hackathons and manage campus experiences." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23183153'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z'/%3E%3C/svg%3E" />
+
+  <!-- Google Fonts: Manrope (Headings) & DM Sans (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#F4F8FC',
+              sky: '#83C5F7',
+              skyHover: '#6eb7f2',
+              skyLight: '#eef7fd',
+              navy: '#183153',
+              navyDark: '#0f2038',
+              ice: '#DCEAF5',
+              white: '#FFFFFF',
+              slate: '#66788C',
+              border: '#E4ECF3',
+            }
+          },
+          fontFamily: {
+            heading: ['Manrope', 'sans-serif'],
+            sans: ['DM Sans', 'sans-serif'],
+          },
+          borderRadius: {
+            card: '16px',
+            btn: '10px',
+          },
+          boxShadow: {
+            'subtle': '0 2px 8px -2px rgba(24, 49, 83, 0.05), 0 1px 4px -1px rgba(24, 49, 83, 0.03)',
+            'card': '0 10px 30px -4px rgba(24, 49, 83, 0.08), 0 4px 12px -2px rgba(24, 49, 83, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="bg-[#F4F8FC] text-[#183153] min-h-screen flex flex-col font-sans selection:bg-[#83C5F7]/30 selection:text-[#183153] overflow-x-hidden">
+
+  <div class="flex-1 flex flex-col lg:flex-row min-h-screen">
+    
+    <!-- ================= LEFT PANEL: BRAND & PHOTOGRAPHY ================= -->
+    <div id="auth-left-panel" class="w-full lg:w-[42%] xl:w-[40%] relative flex flex-col justify-between p-8 sm:p-12 text-white overflow-hidden min-h-[280px] lg:min-h-screen flex-shrink-0">
+      
+      <!-- Background Image -->
+      <img 
+        id="auth-left-bg" 
+        src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80" 
+        alt="Campus experience community" 
+        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700" 
+      />
+
+      <!-- Dark Navy Overlay (~60%) -->
+      <div class="absolute inset-0 bg-[#183153]/70 backdrop-blur-[1px] transition-colors duration-500"></div>
+
+      <!-- Top: Logo (Back to Homepage) -->
+      <div class="relative z-10 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5 group" aria-label="Return to Eventify homepage">
+          <div class="w-10 h-10 rounded-[10px] bg-[#83C5F7] flex items-center justify-center text-[#183153] shadow-sm group-hover:scale-105 transition-transform">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <span class="font-heading font-extrabold text-2xl tracking-tight text-white leading-none">
+            eventify
+          </span>
+        </a>
+
+        <!-- Return Home Link (Mobile) -->
+        <a href="/" class="lg:hidden text-xs font-semibold text-white/80 hover:text-white flex items-center gap-1">
+          <span>&larr;</span> Home
+        </a>
+      </div>
+
+      <!-- Middle/Bottom: Inspiring Typography & Benefit Highlights -->
+      <div class="relative z-10 my-auto lg:my-0 lg:pt-16 pb-4">
+        
+        <!-- Eyebrow Tag -->
+        <span id="auth-left-tag" class="text-xs font-bold uppercase tracking-widest text-[#83C5F7] block mb-2">
+          DISCOVER YOUR CAMPUS
+        </span>
+
+        <!-- Main Title -->
+        <h1 id="auth-left-heading" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-white leading-[1.15] tracking-tight">
+          Your next adventure starts here.
+        </h1>
+
+        <!-- Subtitle -->
+        <p id="auth-left-subtext" class="text-sm sm:text-base text-white/85 mt-3 max-w-md leading-relaxed font-normal">
+          Discover exciting events, meet new people and make unforgettable campus memories.
+        </p>
+
+        <!-- Benefit Highlights (Visible for Organiser screens) -->
+        <div id="auth-left-benefits" class="hidden mt-6 pt-6 border-t border-white/20 space-y-3">
+          <!-- Populated by auth.js -->
+        </div>
+
+      </div>
+
+      <!-- Bottom: Return Home Anchor (Desktop) -->
+      <div class="relative z-10 hidden lg:block">
+        <a href="/" class="inline-flex items-center gap-1.5 text-xs font-medium text-white/70 hover:text-white transition-colors">
+          <span>&larr;</span> Back to Eventify Discovery
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ================= RIGHT PANEL: FORM CARD & NAVIGATION ================= -->
+    <div class="w-full lg:w-[58%] xl:w-[60%] min-h-screen bg-[#F4F8FC] flex flex-col justify-between p-4 sm:p-8 lg:p-12 relative overflow-y-auto">
+      
+      <!-- Top Bar: Segmented Role Switcher -->
+      <div class="flex items-center justify-end w-full max-w-xl mx-auto pt-2 pb-4">
+        <div class="bg-[#E4ECF3]/80 p-1 rounded-full inline-flex items-center border border-[#E4ECF3] shadow-xs" role="tablist" aria-label="Select User Role">
+          <button 
+            id="role-btn-student" 
+            type="button" 
+            role="tab" 
+            aria-selected="true"
+            class="px-5 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs bg-white text-[#183153]"
+          >
+            Student
+          </button>
+          <button 
+            id="role-btn-organiser" 
+            type="button" 
+            role="tab" 
+            aria-selected="false"
+            class="px-5 py-1.5 rounded-full text-xs font-bold transition-all text-[#66788C] hover:text-[#183153]"
+          >
+            Organiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Center Container: Dynamic Form Card -->
+      <div class="my-auto py-6 w-full max-w-[480px] mx-auto">
+        <div class="bg-white rounded-[18px] border border-[#E4ECF3] shadow-card p-7 sm:p-9 transition-all">
+          
+          <!-- Card Header -->
+          <div class="mb-6">
+            <span id="form-eyebrow" class="text-[11px] font-bold uppercase tracking-wider text-[#83C5F7] block mb-1">
+              STUDENT PORTAL
+            </span>
+            <h2 id="form-heading" class="text-2xl sm:text-3xl font-extrabold font-heading text-[#183153] tracking-tight">
+              Welcome back!
+            </h2>
+            <p id="form-subtext" class="text-xs sm:text-sm text-[#66788C] mt-1.5">
+              Sign in to discover events and manage your registrations.
+            </p>
+          </div>
+
+          <!-- Alert / Error Banner -->
+          <div id="form-alert" class="hidden mb-4 p-3.5 rounded-[10px] text-xs font-medium flex items-start gap-2.5">
+            <!-- Dynamic error or success message -->
+          </div>
+
+          <!-- Main Dynamic Form Container -->
+          <form id="auth-form" novalidate>
+            <!-- Dynamic fields injected by auth.js -->
+            <div id="form-fields" class="space-y-4"></div>
+
+            <!-- Primary Action Button -->
+            <button 
+              id="form-submit-btn" 
+              type="submit" 
+              class="w-full mt-5 h-[52px] rounded-[10px] bg-[#83C5F7] hover:bg-[#6eb7f2] text-[#183153] font-bold text-sm btn-spring flex items-center justify-center gap-2 shadow-xs transition-colors"
+            >
+              <span id="submit-btn-text">Sign In</span>
+              <span id="submit-btn-arrow">&rarr;</span>
+            </button>
+          </form>
+
+          <!-- Confirmation State Container (For Forgot Password) -->
+          <div id="form-confirmation" class="hidden py-4 text-center space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-full bg-[#DCEAF5] text-[#183153] flex items-center justify-center text-xl font-bold shadow-xs">
+              ✉️
+            </div>
+            <h3 class="text-xl font-bold font-heading text-[#183153]">Check your inbox</h3>
+            <p id="confirm-subtext" class="text-xs sm:text-sm text-[#66788C] max-w-sm mx-auto leading-relaxed">
+              We've sent password reset instructions to your email address.
+            </p>
+            <button 
+              id="confirm-back-btn" 
+              type="button" 
+              class="w-full h-[50px] rounded-[10px] bg-[#183153] hover:bg-[#0f2038] text-white font-bold text-xs btn-spring"
+            >
+              Back to Login &rarr;
+            </button>
+          </div>
+
+          <!-- Bottom Switch Navigation -->
+          <div id="form-bottom-nav" class="mt-6 pt-5 border-t border-[#E4ECF3] text-center text-xs text-[#66788C]">
+            <span id="bottom-nav-text">Don't have an account?</span>
+            <a id="bottom-nav-link" href="/student/signup" class="font-bold text-[#183153] hover:text-[#83C5F7] ml-1 transition-colors">
+              Sign Up
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Footer: Copyright & Help Floating Button -->
+      <div class="w-full max-w-xl mx-auto pt-4 flex items-center justify-between text-xs text-[#66788C]">
+        <p class="text-center w-full">
+          &copy; 2027 Eventify. Made for communities that bring people together.
+        </p>
+
+        <!-- Help Button -->
+        <button 
+          type="button" 
+          onclick="window.authApp.showHelp()" 
+          class="fixed bottom-6 right-6 w-9 h-9 rounded-full bg-[#183153] text-white flex items-center justify-center text-sm font-bold shadow-lg hover:bg-[#0f2038] hover:scale-105 transition-all z-20"
+          title="Need help?" 
+          aria-label="Help and support"
+        >
+          ?
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2.5 pointer-events-none" aria-live="polite"></div>
+
+  <!-- Authentication Controller -->
+  <script src="/auth.js"></script>
+
+</body>
+</html>

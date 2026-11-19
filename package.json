@@ -1,0 +1,21 @@
+{
+  "name": "eventify",
+  "version": "1.0.0",
+  "description": "Eventify — Modern Student-Focused Event Discovery & Organiser SaaS Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "events",
+    "hackathons",
+    "college",
+    "student",
+    "saas"
+  ],
+  "author": "Eventify Team",
+  "license": "MIT",
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

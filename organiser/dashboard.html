@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventify — Organiser Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23172B45'%3E%3Cpath d='M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z'/%3E%3C/svg%3E" />
+
+  <!-- Google Fonts: Manrope & DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- HTML5 QR Code Scanner Library (Local) -->
+  <script src="/assets/html5-qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pageBg: '#EDF4FA',
+            brandNavy: '#172B45',
+            brandBlue: '#83C5F7',
+            brandIce: '#DCEBFA',
+            brandSlate: '#66788C',
+            brandBorder: '#E2EAF2',
+            bannerBg: '#DDF0FC',
+            bannerBorder: '#CFE5F8'
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            heading: ['Manrope', 'sans-serif'],
+            serif: ['DM Serif Display', 'serif']
+          },
+          boxShadow: {
+            subtle: '0 2px 8px -2px rgba(23, 43, 69, 0.05), 0 1px 4px -1px rgba(23, 43, 69, 0.03)',
+            card: '0 4px 16px -2px rgba(23, 43, 69, 0.06), 0 2px 6px -2px rgba(23, 43, 69, 0.03)',
+            elevated: '0 12px 30px -4px rgba(23, 43, 69, 0.12), 0 4px 10px -2px rgba(23, 43, 69, 0.05)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #edf4fa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3d7ea;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9abedb;
+    }
+
+    .btn-spring {
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-spring:active {
+      transform: scale(0.97);
+    }
+
+    .card-hover {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px -4px rgba(23, 43, 69, 0.08);
+      border-color: #bcd4ea;
+    }
+
+    /* Live QR Scanner laser & viewport */
+    @keyframes scan-laser {
+      0% { top: 6%; opacity: 0.8; }
+      50% { top: 88%; opacity: 1; }
+      100% { top: 6%; opacity: 0.8; }
+    }
+    .scanner-laser {
+      animation: scan-laser 2.2s ease-in-out infinite;
+    }
+    #camera-reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 0.875rem;
+    }
+    #camera-reader {
+      border: none !important;
+    }
+  </style>
+</head>
+
+<body class="bg-pageBg text-brandNavy font-sans min-h-screen flex antialiased selection:bg-brandIce selection:text-brandNavy">
+
+  <!-- ================= FIXED LEFT SIDEBAR ================= -->
+  <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="hidden md:hidden fixed inset-0 bg-brandNavy/50 z-30 transition-opacity"></div>
+
+  <aside id="sidebar-drawer" class="w-64 bg-white border-r border-brandBorder flex flex-col justify-between fixed top-0 bottom-0 left-0 z-40 select-none -translate-x-full md:translate-x-0 transition-transform duration-200">
+    
+    <!-- Top Branding & Navigation -->
+    <div class="overflow-y-auto">
+      <!-- Brand Logo -->
+      <div class="h-20 px-6 flex items-center border-b border-brandBorder/40">
+        <a href="javascript:void(0)" onclick="switchTab('overview')" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-brandNavy flex items-center justify-center text-brandBlue shadow-xs group-hover:scale-105 transition-transform">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-heading font-extrabold text-xl tracking-tight text-brandNavy leading-none">
+              Eventify
+            </span>
+            <span class="text-[10px] font-bold tracking-wider text-brandBlue uppercase mt-0.5">
+              Organiser Studio
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Main Navigation Links -->
+      <nav class="px-3.5 py-4 space-y-1" aria-label="Organiser Navigation">
+        
+        <!-- 1. Overview -->
+        <button 
+          type="button"
+          id="nav-tab-overview"
+          onclick="switchTab('overview')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brandIce text-brandNavy font-bold text-xs sm:text-sm transition-all shadow-xs text-left"
+        >
+          <svg class="w-4 h-4 text-brandNavy shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span>Overview</span>
+        </button>
+
+        <!-- 2. My Events -->
+        <button 
+          type="button"
+          id="nav-tab-events"
+          onclick="switchTab('events')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>My Events</span>
+          <span id="badge-total-events" class="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600">6</span>
+        </button>
+
+        <!-- 3. Create Event -->
+        <button 
+          type="button"
+          id="nav-tab-create"
+          onclick="switchTab('create')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Create Event</span>
+        </button>
+
+        <!-- 4. Registrations -->
+        <button 
+          type="button"
+          id="nav-tab-registrations"
+          onclick="switchTab('registrations')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+          <span>Registrations</span>
+        </button>
+
+        <!-- 5. Attendees -->
+        <button 
+          type="button"
+          id="nav-tab-attendees"
+          onclick="switchTab('attendees')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span>Attendees</span>
+        </button>
+
+        <!-- 6. Ticket Management -->
+        <button 
+          type="button"
+          id="nav-tab-tickets"
+          onclick="switchTab('tickets')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+          </svg>
+          <span>Ticket Management</span>
+          <span class="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700">QR Gate</span>
+        </button>
+
+        <!-- 7. Analytics -->
+        <button 
+          type="button"
+          id="nav-tab-analytics"
+          onclick="switchTab('analytics')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span>Analytics</span>
+        </button>
+
+        <!-- 8. Organiser Profile -->
+        <button 
+          type="button"
+          id="nav-tab-profile"
+          onclick="switchTab('profile')" 
+          class="nav-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-xs sm:text-sm transition-colors text-left"
+        >
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          <span>Organiser Profile</span>
+        </button>
+
+      </nav>
+    </div>
+
+    <!-- Bottom Actions: Settings, Help & Logout -->
+    <div class="p-4 border-t border-brandBorder space-y-1">
+      <button 
+        type="button" 
+        onclick="switchTab('profile')" 
+        class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 text-xs font-medium transition-colors text-left"
+      >
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>Settings</span>
+      </button>
+
+      <button 
+        type="button" 
+        onclick="showToast('Eventify Organiser Support is available 24/7 at support@eventify.com', 'info')" 
+        class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 text-xs font-medium transition-colors text-left"
+      >
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <span>Help & Support</span>
+      </button>
+
+      <button 
+        type="button" 
+        onclick="handleLogout()" 
+        class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-brandSlate hover:text-red-600 hover:bg-red-50 text-xs font-medium transition-colors text-left"
+      >
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- ================= MAIN DASHBOARD WRAPPER ================= -->
+  <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+    
+    <!-- ================= TOP NAVIGATION BAR ================= -->
+    <header class="h-20 bg-pageBg border-b border-brandBorder/60 sticky top-0 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between backdrop-blur-md">
+      
+      <!-- Mobile Sidebar Toggle -->
+      <button 
+        type="button" 
+        onclick="toggleMobileSidebar()" 
+        class="md:hidden mr-3 p-2 rounded-xl text-brandNavy hover:bg-white/80 transition-colors"
+        aria-label="Toggle navigation menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <!-- Global Search Bar -->
+      <div class="relative w-full max-w-xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="global-search-input"
+          oninput="handleGlobalSearch(this.value)"
+          placeholder="Search events, attendees, tickets..." 
+          class="w-full pl-10 pr-4 py-2.5 bg-white border border-brandBorder rounded-full text-xs md:text-sm text-brandNavy placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brandBlue/40 focus:border-brandBlue transition-all shadow-subtle"
+        />
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-4 sm:gap-5 ml-4">
+        
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button 
+            type="button" 
+            onclick="toggleNotifications()"
+            class="p-2 rounded-full text-brandNavy hover:bg-white/80 transition-colors relative" 
+            aria-label="View organiser notifications"
+          >
+            <svg class="w-5 h-5 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brandBlue border border-white"></span>
+          </button>
+
+          <!-- Notification Dropdown -->
+          <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-elevated border border-brandBorder p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-3 border-b border-brandBorder">
+              <span class="text-xs font-bold uppercase tracking-wider text-brandNavy">Organiser Activity</span>
+              <span class="text-[10px] font-semibold text-brandBlue cursor-pointer" onclick="markAllNotificationsRead()">Mark read</span>
+            </div>
+            <div class="mt-3 space-y-2.5 text-xs">
+              <div class="flex items-start gap-2.5 p-2 rounded-xl bg-blue-50/50">
+                <div class="w-2 h-2 rounded-full bg-brandBlue mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="font-bold text-brandNavy">Gautam registered for National Hackathon</p>
+                  <p class="text-[11px] text-slate-500">Ticket EVT-2027-001 issued • 10 mins ago</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="font-bold text-brandNavy">Gate 1 Admitted Attendee</p>
+                  <p class="text-[11px] text-slate-500">Priya Sharma checked in via QR pass</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                <div class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="font-bold text-brandNavy">Capacity Milestone: 76%</p>
+                  <p class="text-[11px] text-slate-500">National Hackathon 2027 has 116 spots remaining</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organiser Profile Avatar & Name -->
+        <div class="relative">
+          <button 
+            type="button" 
+            onclick="toggleUserDropdown()" 
+            class="flex items-center gap-2.5 pl-2 pr-1 py-1 rounded-full hover:bg-white/80 transition-colors group"
+          >
+            <div id="org-avatar-circle" class="w-8 h-8 rounded-full bg-brandNavy text-brandBlue flex items-center justify-center font-bold text-sm shadow-xs border border-white">
+              SC
+            </div>
+            <div class="hidden sm:flex flex-col text-left">
+              <span id="org-nav-name" class="text-xs font-bold text-brandNavy leading-tight">
+                Sarah Chen
+              </span>
+              <span id="org-nav-club" class="text-[10px] text-brandSlate leading-tight">
+                TechNova Club
+              </span>
+            </div>
+            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <!-- User Menu Dropdown -->
+          <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-elevated border border-brandBorder py-2 z-50 text-xs">
+            <div class="px-4 py-2.5 border-b border-brandBorder">
+              <p id="dropdown-org-name" class="font-bold text-brandNavy">Sarah Chen</p>
+              <p id="dropdown-org-email" class="text-[11px] text-brandSlate truncate">organiser@campus.edu</p>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#83C5F7]/25 text-brandNavy">
+                Verified Organiser
+              </span>
+            </div>
+            <button onclick="switchTab('profile'); closeUserDropdown();" class="w-full text-left flex items-center gap-2.5 px-4 py-2 font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <span>Organiser Profile</span>
+            </button>
+            <a href="/student/dashboard" class="flex items-center gap-2.5 px-4 py-2 font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+              <span>Switch to Student View</span>
+            </a>
+            <a href="/" class="flex items-center gap-2.5 px-4 py-2 font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>Eventify Homepage</span>
+            </a>
+            <div class="border-t border-brandBorder my-1"></div>
+            <button onclick="handleLogout()" class="w-full text-left flex items-center gap-2.5 px-4 py-2 font-semibold text-red-600 hover:bg-red-50 transition-colors">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ================= MAIN CONTENT VIEWS ================= -->
+    <main class="flex-1 p-6 lg:p-8">
+      
+      <!-- ================= 1. OVERVIEW TAB ================= -->
+      <section id="tab-overview" class="tab-content space-y-6">
+        
+        <!-- Welcome Hero Card -->
+        <div class="relative overflow-hidden bg-bannerBg border border-bannerBorder rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-subtle">
+          <div class="max-w-xl z-10">
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              Welcome back, <span id="overview-org-name">Sarah Chen</span>! 👋
+            </h1>
+            <p class="text-xs sm:text-sm text-[#4E677F] mt-2 font-normal leading-relaxed">
+              Manage your events, track registrations and create memorable campus experiences for thousands of students.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <button 
+                type="button" 
+                onclick="switchTab('create')" 
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brandNavy text-white font-bold text-xs sm:text-sm hover:bg-[#0f2038] transition-all shadow-md btn-spring"
+              >
+                <span>+ Create New Event</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="switchTab('tickets')" 
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-brandBorder text-brandNavy font-bold text-xs sm:text-sm hover:bg-slate-50 transition-all shadow-xs btn-spring"
+              >
+                <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+                <span>Open QR Admission Gate</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Subtle Right Illustration -->
+          <div class="relative shrink-0 w-44 h-32 flex items-center justify-center">
+            <div class="absolute -right-4 -bottom-4 w-40 h-40 rounded-full bg-[#CCE6F9]/60 pointer-events-none"></div>
+            <svg class="w-40 h-32 relative z-10" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="115" width="160" height="6" rx="3" fill="#A8CEE8"/>
+              <!-- Analytics Graph Card -->
+              <rect x="90" y="25" width="85" height="65" rx="8" fill="#FFFFFF" stroke="#83C5F7" stroke-width="2"/>
+              <path d="M100 70L118 52L135 60L160 38" stroke="#172B45" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="160" cy="38" r="3.5" fill="#83C5F7"/>
+              <!-- Organiser Figure -->
+              <circle cx="55" cy="48" r="13" fill="#D39276"/>
+              <path d="M43 45C43 36 50 35 59 35C67 35 69 41 68 48C63 44 51 45 43 45Z" fill="#172B45"/>
+              <path d="M38 78C38 66 46 64 55 64C65 64 73 66 73 78V115H38V78Z" fill="#172B45"/>
+              <rect x="68" y="80" width="35" height="24" rx="3" fill="#83C5F7" stroke="#172B45" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Four Key Business Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <!-- Stat 1: Total Events -->
+          <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brandSlate uppercase tracking-wider">Total Events</span>
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-brandNavy flex items-center justify-center">
+                <svg class="w-5 h-5 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div id="stat-total-events" class="font-heading font-extrabold text-3xl text-brandNavy leading-none">6</div>
+              <p class="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+                <span>↑ +2 this month</span>
+                <span class="text-slate-400 font-normal">• 4 Active</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat 2: Total Registrations -->
+          <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brandSlate uppercase tracking-wider">Total Registrations</span>
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div id="stat-total-registrations" class="font-heading font-extrabold text-3xl text-brandNavy leading-none">1,579</div>
+              <p class="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+                <span>↑ +18.4% vs last period</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat 3: Total Attendees -->
+          <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brandSlate uppercase tracking-wider">Total Attendees</span>
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div id="stat-total-attendees" class="font-heading font-extrabold text-3xl text-brandNavy leading-none">425</div>
+              <p class="text-xs text-slate-500 font-medium mt-2 flex items-center gap-1">
+                <span>63.2% check-in rate</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat 4: Upcoming Events -->
+          <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brandSlate uppercase tracking-wider">Upcoming Events</span>
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div id="stat-upcoming-events" class="font-heading font-extrabold text-3xl text-brandNavy leading-none">3</div>
+              <p class="text-xs text-brandNavy font-semibold mt-2 truncate">
+                Next: 15–16 Feb (Hackathon)
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2-Column Overview Section: Live Event Performance & Recent Registrations -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left Column (8 cols): Active Events Roster -->
+          <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-brandBorder shadow-card">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div>
+                <h3 class="font-heading font-extrabold text-base text-brandNavy">Active Events Overview</h3>
+                <p class="text-xs text-brandSlate">Live registration and capacity tracking.</p>
+              </div>
+              <button onclick="switchTab('events')" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+                View All Events →
+              </button>
+            </div>
+
+            <!-- Mini Event Items List -->
+            <div id="overview-events-list" class="space-y-4">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Right Column (4 cols): Quick Scanner & Recent Check-in Activity -->
+          <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Quick QR Scanner Action Box -->
+            <div class="bg-gradient-to-br from-[#172B45] to-[#0F2038] text-white rounded-2xl p-5 shadow-card">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-brandBlue">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-sm">Gate Admission Mode</h4>
+                  <p class="text-[11px] text-blue-200">Scan student pass QR tokens</p>
+                </div>
+              </div>
+              <p class="text-xs text-blue-100/80 mt-3 leading-relaxed">
+                Admit attendees with instantaneous duplicate prevention and verified registry tokens.
+              </p>
+              <button 
+                onclick="switchTab('tickets')" 
+                class="mt-4 w-full py-2.5 rounded-xl bg-brandBlue hover:bg-[#6eb7f2] text-brandNavy font-bold text-xs transition-colors text-center"
+              >
+                Launch QR Scanner &rarr;
+              </button>
+            </div>
+
+            <!-- Recent RSVPs Box -->
+            <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <h4 class="font-heading font-extrabold text-sm text-brandNavy">Recent RSVPs</h4>
+                <button onclick="switchTab('registrations')" class="text-[11px] font-bold text-brandBlue hover:underline">
+                  View All
+                </button>
+              </div>
+              <div id="overview-recent-rsvps" class="space-y-3 text-xs">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= 2. MY EVENTS TAB ================= -->
+      <section id="tab-events" class="tab-content hidden space-y-6">
+        
+        <!-- Controls Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              My Events
+            </h2>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Manage your published, upcoming, and draft campus events.
+            </p>
+          </div>
+          <button 
+            type="button" 
+            onclick="switchTab('create')" 
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brandNavy text-white font-bold text-xs sm:text-sm hover:bg-[#0f2038] transition-all shadow-sm btn-spring w-fit"
+          >
+            <span>+ Create New Event</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-brandBorder shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          
+          <!-- Search in Events -->
+          <div class="relative flex-1 max-w-sm">
+            <input 
+              type="text" 
+              id="event-search-filter"
+              oninput="filterMyEvents()"
+              placeholder="Search by event title..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none focus:ring-1 focus:ring-brandBlue"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+
+          <!-- Filter Dropdowns -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Status Filter -->
+            <select 
+              id="event-status-filter" 
+              onchange="filterMyEvents()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="Registration Open">Registration Open</option>
+              <option value="Published">Published</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+
+            <!-- Category Filter -->
+            <select 
+              id="event-category-filter" 
+              onchange="filterMyEvents()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Categories</option>
+              <option value="Hackathons">Hackathons</option>
+              <option value="Technology">Technology</option>
+              <option value="Cultural & Arts">Cultural & Arts</option>
+              <option value="Business">Business</option>
+              <option value="Workshops">Workshops</option>
+              <option value="Design">Design</option>
+            </select>
+
+            <!-- Sort By -->
+            <select 
+              id="event-sort-by" 
+              onchange="filterMyEvents()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="date-asc">Date: Upcoming First</option>
+              <option value="date-desc">Date: Latest First</option>
+              <option value="reg-desc">Highest Registrations</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Event Cards Grid -->
+        <div id="events-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Rendered dynamically -->
+        </div>
+
+      </section>
+
+
+      <!-- ================= 3. CREATE EVENT TAB ================= -->
+      <section id="tab-create" class="tab-content hidden space-y-6">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              Create New Event
+            </h2>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Fill in your event details to publish on the Eventify student discovery platform.
+            </p>
+          </div>
+          <button onclick="switchTab('events')" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+            ← Cancel & Back
+          </button>
+        </div>
+
+        <!-- Event Creation Form -->
+        <form id="create-event-form" onsubmit="handleCreateEventSubmit(event)" class="space-y-6">
+          
+          <!-- Section A: Basic Information -->
+          <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="font-heading font-extrabold text-base text-brandNavy">Section A — Basic Information</h3>
+              <p class="text-xs text-brandSlate">Title, banner, category and searchable event tags.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event Title *</label>
+                <input 
+                  type="text" 
+                  id="form-event-title" 
+                  required 
+                  placeholder="e.g. National Hackathon 2027" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:ring-2 focus:ring-brandBlue/30 focus:outline-none"
+                />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event Description *</label>
+                <textarea 
+                  id="form-event-desc" 
+                  required 
+                  rows="3" 
+                  placeholder="Describe your event, theme, objectives, and why students should participate..." 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:ring-2 focus:ring-brandBlue/30 focus:outline-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Category *</label>
+                <select 
+                  id="form-event-category" 
+                  required 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:ring-2 focus:ring-brandBlue/30 focus:outline-none"
+                >
+                  <option value="Sports">Sports</option>
+                  <option value="Hackathons">Hackathons</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Cultural & Arts">Cultural & Arts</option>
+                  <option value="Workshops">Workshops</option>
+                  <option value="Business">Business</option>
+                  <option value="Design">Design</option>
+                  <option value="Science">Science</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Search Tags (Comma separated)</label>
+                <input 
+                  type="text" 
+                  id="form-event-tags" 
+                  placeholder="Sports, Athletics, Hackathon, Coding, Students" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:ring-2 focus:ring-brandBlue/30 focus:outline-none"
+                />
+              </div>
+
+              <!-- Full Banner Liberty Section: Upload, Presets, or Custom Link -->
+              <div class="md:col-span-2 p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="block text-xs font-extrabold text-brandNavy">Event Banner / Cover Image *</label>
+                    <p class="text-[11px] text-brandSlate">Choose any image from your computer, pick a collegiate theme, or paste any web link.</p>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-md bg-brandIce text-brandNavy text-[10px] font-bold">Custom Banner Liberty</span>
+                </div>
+
+                <!-- Banner Source Selector Tabs -->
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button 
+                    type="button" 
+                    id="btn-banner-tab-upload"
+                    onclick="switchBannerSource('upload')" 
+                    class="px-3 py-1.5 rounded-lg bg-white border border-brandBlue text-brandNavy font-bold text-xs shadow-xs flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>📁 Upload from Device</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    id="btn-banner-tab-presets"
+                    onclick="switchBannerSource('presets')" 
+                    class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-brandBlue text-brandSlate hover:text-brandNavy font-medium text-xs shadow-xs flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>🎨 Curated Sports & Campus Themes</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    id="btn-banner-tab-url"
+                    onclick="switchBannerSource('url')" 
+                    class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-brandBlue text-brandSlate hover:text-brandNavy font-medium text-xs shadow-xs flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>🔗 Paste Image URL</span>
+                  </button>
+                </div>
+
+                <!-- 1. Upload from Computer Dropzone -->
+                <div id="banner-source-upload" class="space-y-2">
+                  <div 
+                    onclick="document.getElementById('form-event-banner-file').click()"
+                    ondragover="event.preventDefault(); this.classList.add('border-brandBlue', 'bg-sky-50/50');"
+                    ondragleave="this.classList.remove('border-brandBlue', 'bg-sky-50/50')"
+                    ondrop="event.preventDefault(); this.classList.remove('border-brandBlue', 'bg-sky-50/50'); handleBannerFileDrop(event, 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                    class="border-2 border-dashed border-slate-300 hover:border-brandBlue rounded-xl p-6 text-center cursor-pointer transition-colors bg-white group"
+                  >
+                    <svg class="w-8 h-8 mx-auto text-slate-400 group-hover:text-brandBlue transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-xs font-bold text-brandNavy group-hover:text-brandNavy">
+                      Click to browse or drag & drop your banner image here
+                    </p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Supports PNG, JPG, JPEG, WEBP (No size limit)</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    id="form-event-banner-file" 
+                    accept="image/*" 
+                    class="hidden" 
+                    onchange="handleBannerFileSelect(this, 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                  />
+                </div>
+
+                <!-- 2. Curated Sports & College Presets -->
+                <div id="banner-source-presets" class="hidden space-y-2">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">🏃 Athletics & Sports Track</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">🏀 Basketball Court Arena</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">⚽ Football Stadium Field</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">💻 Hackathon & Code Sprint</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">🎭 Cultural & Music Fest</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onclick="applyBannerPreset('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80', 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="p-2 rounded-xl border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-xs group"
+                    >
+                      <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=300&q=80" class="w-full h-16 object-cover rounded-lg mb-1.5"/>
+                      <span class="font-bold text-brandNavy block group-hover:text-brandBlue">💼 Startup & Pitch Challenge</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3. Direct Image URL Input (with Auto-Sanitizer for Bing/Google) -->
+                <div id="banner-source-url" class="hidden space-y-2">
+                  <div class="flex gap-2">
+                    <input 
+                      type="text" 
+                      id="form-event-thumbnail-input" 
+                      placeholder="Paste image link, or Bing/Google image search result URL..." 
+                      class="flex-1 px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:ring-2 focus:ring-brandBlue/30 focus:outline-none bg-white"
+                      oninput="handleBannerUrlInput(this.value, 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                    />
+                    <button 
+                      type="button" 
+                      onclick="handleBannerUrlInput(document.getElementById('form-event-thumbnail-input').value, 'form-event-thumbnail', 'create-banner-preview', 'create-banner-preview-box')"
+                      class="px-4 py-2 rounded-xl bg-brandNavy text-white font-bold text-xs"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Pasted Bing or Google image links are automatically converted to direct image previews.</p>
+                </div>
+
+                <!-- Hidden Input holding final Banner Data (URL or Base64 Data URL) -->
+                <input type="hidden" id="form-event-thumbnail" value="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80" />
+
+                <!-- Live Banner Preview Card -->
+                <div id="create-banner-preview-box" class="pt-2">
+                  <div class="relative h-40 w-full rounded-xl overflow-hidden border border-brandBorder shadow-sm bg-slate-100 group">
+                    <img 
+                      id="create-banner-preview" 
+                      src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80" 
+                      alt="Banner Preview" 
+                      class="w-full h-full object-cover"
+                      onerror="this.src='https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80'"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-brandNavy/80 via-transparent to-transparent flex items-end justify-between p-3.5">
+                      <div class="text-white">
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded-md">Live Banner Preview</span>
+                        <p class="text-xs font-bold text-white/95 mt-1">This is how your event banner will display across Eventify</p>
+                      </div>
+                      <button 
+                        type="button" 
+                        onclick="document.getElementById('form-event-banner-file').click()"
+                        class="px-3 py-1.5 rounded-lg bg-white/90 hover:bg-white text-brandNavy font-bold text-xs shadow-sm transition-colors"
+                      >
+                        Change Photo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Section B: Date & Venue -->
+          <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="font-heading font-extrabold text-base text-brandNavy">Section B — Date & Venue</h3>
+              <p class="text-xs text-brandSlate">Schedule, timings, and campus location details.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event Start Date *</label>
+                <input 
+                  type="date" 
+                  id="form-event-date-start" 
+                  required 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event End Date *</label>
+                <input 
+                  type="date" 
+                  id="form-event-date-end" 
+                  required 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Start Time *</label>
+                <input 
+                  type="time" 
+                  id="form-event-time-start" 
+                  required 
+                  value="09:00"
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">End Time *</label>
+                <input 
+                  type="time" 
+                  id="form-event-time-end" 
+                  required 
+                  value="18:00"
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Venue / Auditorium Name *</label>
+                <input 
+                  type="text" 
+                  id="form-event-venue" 
+                  required 
+                  placeholder="e.g. Main Tech Auditorium & Innovation Hub" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event Format *</label>
+                <select 
+                  id="form-event-type" 
+                  required 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                >
+                  <option value="In-Person">In-Person (Campus)</option>
+                  <option value="Online / Virtual">Online / Virtual</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-brandNavy mb-1">Complete Address / Room Number</label>
+                <input 
+                  type="text" 
+                  id="form-event-address" 
+                  placeholder="Campus Tech Park, Sector 4, Bengaluru" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section C: Registration Settings -->
+          <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="font-heading font-extrabold text-base text-brandNavy">Section C — Registration Settings</h3>
+              <p class="text-xs text-brandSlate">Capacity, student eligibility, and registration deadlines.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Max Capacity (Number of Seats) *</label>
+                <input 
+                  type="number" 
+                  id="form-event-capacity" 
+                  required 
+                  min="1" 
+                  value="300"
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Eligibility Criteria</label>
+                <input 
+                  type="text" 
+                  id="form-event-eligibility" 
+                  placeholder="College Students with valid student ID" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section D: Additional Information -->
+          <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="font-heading font-extrabold text-base text-brandNavy">Section D — Agenda & Contact</h3>
+              <p class="text-xs text-brandSlate">Event schedule, speakers, and organiser contact email.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-brandNavy mb-1">Event Agenda Outline</label>
+                <textarea 
+                  id="form-event-agenda" 
+                  rows="2" 
+                  placeholder="10:00 AM: Keynote. 12:00 PM: Hacking kickoff. 4:00 PM: Demos." 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Contact Email</label>
+                <input 
+                  type="email" 
+                  id="form-event-email" 
+                  value="organiser@campus.edu" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandNavy mb-1">Contact Phone</label>
+                <input 
+                  type="tel" 
+                  id="form-event-phone" 
+                  placeholder="+91 98765 43210" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section E: Publishing Actions -->
+          <div class="bg-slate-50 rounded-2xl p-5 border border-brandBorder flex flex-wrap items-center justify-between gap-4">
+            <div class="text-xs text-slate-500">
+              Published events will immediately appear in the student Explore Events feed and student dashboard.
+            </div>
+            <div class="flex items-center gap-3">
+              <button 
+                type="button" 
+                onclick="handleSaveDraft()" 
+                class="px-5 py-2.5 rounded-xl bg-white border border-brandBorder hover:bg-slate-100 text-brandNavy font-bold text-xs transition-colors"
+              >
+                Save as Draft
+              </button>
+              <button 
+                type="submit" 
+                class="px-6 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-md btn-spring"
+              >
+                Publish Event
+              </button>
+            </div>
+          </div>
+
+        </form>
+
+      </section>
+
+
+      <!-- ================= 4. REGISTRATIONS MANAGEMENT TAB ================= -->
+      <section id="tab-registrations" class="tab-content hidden space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              Registration Management
+            </h2>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Review and manage incoming student RSVPs and ticket allocations.
+            </p>
+          </div>
+          <button 
+            onclick="exportRegistrationsCSV()" 
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-brandBorder hover:bg-slate-50 text-brandNavy font-bold text-xs shadow-xs w-fit"
+          >
+            <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span>Export Registrations CSV</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-brandBorder shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          
+          <div class="relative flex-1 max-w-sm">
+            <input 
+              type="text" 
+              id="reg-search-input"
+              oninput="filterRegistrationsTable()"
+              placeholder="Search by student name or Reg ID..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Event Filter -->
+            <select 
+              id="reg-event-filter" 
+              onchange="filterRegistrationsTable()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Events</option>
+              <option value="National Hackathon 2027">National Hackathon 2027</option>
+              <option value="Campus Cultural Fest">Campus Cultural Fest</option>
+              <option value="AI Innovation Summit">AI Innovation Summit</option>
+              <option value="Startup Pitch Challenge">Startup Pitch Challenge</option>
+              <option value="AI for Everyone: Masterclass">AI for Everyone: Masterclass</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select 
+              id="reg-status-filter" 
+              onchange="filterRegistrationsTable()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Registrations Table -->
+        <div class="bg-white rounded-2xl border border-brandBorder shadow-card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-brandBorder text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th class="py-3.5 px-4">Student</th>
+                  <th class="py-3.5 px-4">Event</th>
+                  <th class="py-3.5 px-4">Registration ID</th>
+                  <th class="py-3.5 px-4">Date Registered</th>
+                  <th class="py-3.5 px-4">Status</th>
+                  <th class="py-3.5 px-4">Ticket</th>
+                  <th class="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="registrations-table-body" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= 5. ATTENDEES TAB ================= -->
+      <section id="tab-attendees" class="tab-content hidden space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              Attendee Management
+            </h2>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Track real-time check-in status, admission timestamps, and verified rosters.
+            </p>
+          </div>
+          <button 
+            onclick="exportAttendeesCSV()" 
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-brandBorder hover:bg-slate-50 text-brandNavy font-bold text-xs shadow-xs w-fit"
+          >
+            <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span>Export Attendee List CSV</span>
+          </button>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-brandBorder shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          <div class="relative flex-1 max-w-sm">
+            <input 
+              type="text" 
+              id="att-search-input"
+              oninput="filterAttendeesTable()"
+              placeholder="Search by attendee name or ID..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <select 
+              id="att-event-filter" 
+              onchange="filterAttendeesTable()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Events</option>
+              <option value="National Hackathon 2027">National Hackathon 2027</option>
+              <option value="Campus Cultural Fest">Campus Cultural Fest</option>
+              <option value="AI Innovation Summit">AI Innovation Summit</option>
+              <option value="AI for Everyone: Masterclass">AI for Everyone: Masterclass</option>
+            </select>
+
+            <select 
+              id="att-checkin-filter" 
+              onchange="filterAttendeesTable()" 
+              class="px-3 py-2 bg-slate-50 border border-brandBorder rounded-xl text-xs text-brandNavy focus:outline-none"
+            >
+              <option value="ALL">All Attendance Status</option>
+              <option value="Checked In">Checked In</option>
+              <option value="Not Checked In">Not Checked In</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Attendees Table -->
+        <div class="bg-white rounded-2xl border border-brandBorder shadow-card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-brandBorder text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th class="py-3.5 px-4">Student Name</th>
+                  <th class="py-3.5 px-4">Registration ID</th>
+                  <th class="py-3.5 px-4">Event</th>
+                  <th class="py-3.5 px-4">Ticket ID</th>
+                  <th class="py-3.5 px-4">Check-in Status</th>
+                  <th class="py-3.5 px-4">Check-in Timestamp</th>
+                  <th class="py-3.5 px-4 text-right">Gate Action</th>
+                </tr>
+              </thead>
+              <tbody id="attendees-table-body" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= 6. TICKET MANAGEMENT & QR VALIDATION TAB ================= -->
+      <section id="tab-tickets" class="tab-content hidden space-y-6">
+        
+        <div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+            Ticket Management & QR Validation Gate
+          </h2>
+          <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+            Validate digital event passes, scan tokens, and admit students in real time.
+          </p>
+        </div>
+
+        <!-- Dedicated QR Gate Scanner Box -->
+        <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-brandNavy text-brandBlue flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-heading font-extrabold text-base text-brandNavy">Gate QR Pass Scanner & Token Validator</h3>
+                <p class="text-xs text-brandSlate">Scan student ticket QR codes via live camera, image upload, or scanner gun.</p>
+              </div>
+            </div>
+
+            <!-- Auto-Admit & Sample Pass Actions -->
+            <div class="flex items-center gap-3 self-end sm:self-auto">
+              <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                <input type="checkbox" id="scanner-auto-admit" class="w-3.5 h-3.5 rounded text-brandNavy focus:ring-brandBlue accent-brandNavy" checked />
+                <span class="font-bold text-brandNavy text-[11px]">⚡ Auto-Admit on Scan</span>
+              </label>
+
+              <button 
+                type="button" 
+                onclick="openSamplePassModal()" 
+                class="px-3 py-1.5 rounded-xl bg-brandIce hover:bg-[#cbe2f8] text-brandNavy font-bold text-xs transition-colors flex items-center gap-1.5"
+                title="Open a sample student pass QR code to test camera scanning"
+              >
+                <span>📱 Test Ticket QR</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left: Live Scanner Modes (7 cols) -->
+            <div class="lg:col-span-7 space-y-4">
+              
+              <!-- Scanner Method Selection Tabs -->
+              <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                <button 
+                  type="button" 
+                  id="tab-btn-scanner-camera"
+                  onclick="switchScannerTab('camera')" 
+                  class="px-3 py-1.5 rounded-lg bg-brandNavy text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span>📷 Live Camera Scanner</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="tab-btn-scanner-file"
+                  onclick="switchScannerTab('file')" 
+                  class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-brandSlate hover:text-brandNavy font-semibold text-xs flex items-center gap-1.5 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <span>📁 Scan Pass Image</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="tab-btn-scanner-manual"
+                  onclick="switchScannerTab('manual')" 
+                  class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-brandSlate hover:text-brandNavy font-semibold text-xs flex items-center gap-1.5 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <span>⌨️ Token / Barcode Gun</span>
+                </button>
+              </div>
+
+              <!-- 1. MODE: LIVE CAMERA SCANNER -->
+              <div id="scanner-view-camera" class="space-y-3">
+                <div class="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-elevated min-h-[260px] flex items-center justify-center">
+                  
+                  <!-- Camera Viewfinder Mount -->
+                  <div id="camera-reader" class="w-full h-full min-h-[260px]"></div>
+
+                  <!-- Idle / Start Camera Placeholder -->
+                  <div id="camera-idle-overlay" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-6 text-center z-20">
+                    <div class="w-16 h-16 rounded-2xl bg-brandNavy/80 border border-brandBlue/30 text-brandBlue flex items-center justify-center mb-3">
+                      <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                      </svg>
+                    </div>
+                    <h4 class="font-heading font-extrabold text-sm text-white">Live Camera Ticket Scanner</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs">
+                      Activate camera to scan QR codes on students' phones or printed passes directly.
+                    </p>
+                    <button 
+                      type="button" 
+                      onclick="startLiveCameraScanner()" 
+                      class="mt-4 px-5 py-2.5 rounded-xl bg-brandBlue hover:bg-[#6eb7f2] text-brandNavy font-extrabold text-xs transition-all shadow-md flex items-center gap-2 btn-spring"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <span>Start Camera Scanner</span>
+                    </button>
+                  </div>
+
+                  <!-- Active Viewfinder Overlays (Reticle & Laser) -->
+                  <div id="camera-active-overlay" class="hidden absolute inset-0 pointer-events-none z-10 flex flex-col items-center justify-center p-6">
+                    <!-- Laser Scan Beam -->
+                    <div class="scanner-laser absolute left-8 right-8 h-0.5 bg-brandBlue shadow-[0_0_12px_#83C5F7]"></div>
+
+                    <!-- Target Reticle Box -->
+                    <div class="w-52 h-52 border-2 border-brandBlue/60 rounded-2xl relative shadow-[0_0_0_9999px_rgba(15,23,42,0.45)]">
+                      <!-- Reticle corners -->
+                      <span class="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-brandBlue rounded-tl-lg"></span>
+                      <span class="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-brandBlue rounded-tr-lg"></span>
+                      <span class="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-brandBlue rounded-bl-lg"></span>
+                      <span class="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-brandBlue rounded-br-lg"></span>
+                    </div>
+
+                    <div class="mt-4 px-3 py-1 rounded-full bg-brandNavy/80 backdrop-blur-xs text-brandBlue text-[11px] font-bold border border-brandBlue/30">
+                      Align QR Code within frame
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Camera Controls Toolbar -->
+                <div id="camera-controls-bar" class="hidden flex items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-xs font-bold text-brandNavy">Scanner Live</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button 
+                      type="button" 
+                      onclick="flipCameraScanner()" 
+                      class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-brandNavy text-brandNavy text-xs font-bold transition-colors"
+                      title="Switch Camera (Front/Rear)"
+                    >
+                      🔄 Flip Camera
+                    </button>
+                    <button 
+                      type="button" 
+                      onclick="stopLiveCameraScanner()" 
+                      class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition-colors"
+                    >
+                      ⏹️ Stop Camera
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. MODE: SCAN PASS FROM IMAGE / SCREENSHOT -->
+              <div id="scanner-view-file" class="hidden space-y-3">
+                <div 
+                  onclick="document.getElementById('ticket-qr-file-input').click()"
+                  ondragover="event.preventDefault(); this.classList.add('border-brandBlue', 'bg-sky-50/50');"
+                  ondragleave="this.classList.remove('border-brandBlue', 'bg-sky-50/50')"
+                  ondrop="event.preventDefault(); this.classList.remove('border-brandBlue', 'bg-sky-50/50'); handleScanQrFromDrop(event)"
+                  class="border-2 border-dashed border-slate-300 hover:border-brandBlue rounded-2xl p-8 text-center cursor-pointer transition-colors bg-white group min-h-[220px] flex flex-col items-center justify-center"
+                >
+                  <div class="w-12 h-12 rounded-2xl bg-brandIce text-brandNavy flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                  </div>
+                  <h4 class="font-heading font-extrabold text-sm text-brandNavy">Upload or Drop Student QR Pass Image</h4>
+                  <p class="text-xs text-slate-400 mt-1 max-w-sm">
+                    Drag and drop a screenshot or image of the student's ticket to decode and admit immediately.
+                  </p>
+                  <button type="button" class="mt-3 px-4 py-1.5 rounded-lg bg-brandNavy text-white font-bold text-xs pointer-events-none">
+                    Browse File
+                  </button>
+                </div>
+                <input 
+                  type="file" 
+                  id="ticket-qr-file-input" 
+                  accept="image/*" 
+                  class="hidden" 
+                  onchange="handleScanQrFromFile(this)"
+                />
+              </div>
+
+              <!-- 3. MODE: BARCODE SCANNER GUN & MANUAL TOKEN INPUT -->
+              <div id="scanner-view-manual" class="hidden space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-brandNavy mb-1">USB Barcode Gun Scan / Pass Token</label>
+                  <div class="flex gap-2">
+                    <input 
+                      type="text" 
+                      id="scanner-token-input" 
+                      placeholder="Scan with barcode gun or paste token (e.g. tkn_sec_sportii_001_99a1 or EVT-SPORT-001)" 
+                      class="flex-1 px-4 py-2.5 rounded-xl border border-brandBorder font-mono text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                      onkeydown="if(event.key === 'Enter') handleScanVerify()"
+                    />
+                    <button 
+                      type="button" 
+                      onclick="handleScanVerify()" 
+                      class="px-5 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-sm"
+                    >
+                      Verify Pass
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-slate-400 mt-1">Pressing ENTER or using a handheld barcode gun triggers immediate verification.</p>
+                </div>
+              </div>
+
+              <!-- Dynamic Quick Test Passes (Scoped to THIS Organiser) -->
+              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-brandNavy">Quick Test Pass Tokens (Your Attendees):</span>
+                  <span class="text-[10px] text-brandSlate">Click to simulate scanner</span>
+                </div>
+                <div id="quick-test-pass-chips" class="flex flex-wrap gap-2">
+                  <!-- Dynamically populated from myRegistrations -->
+                </div>
+              </div>
+
+              <div class="text-[11px] text-slate-500 leading-relaxed flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                <span>Protected by Eventify's duplicate rejection gate (<code class="bg-slate-100 px-1 py-0.5 rounded text-brandNavy">/api/check-in</code>). Pass-sharing fraud is blocked in real time.</span>
+              </div>
+            </div>
+
+            <!-- Right: Validation Result Card (5 cols) -->
+            <div class="lg:col-span-5 bg-[#F9FBFE] rounded-2xl p-5 border border-brandBorder text-xs">
+              
+              <div id="scan-result-idle" class="text-center py-6 text-slate-400">
+                <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+                <p class="font-semibold text-slate-500">Scan or select a token to verify</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Live gate validation status will appear here</p>
+              </div>
+
+              <!-- Result: Valid Pass -->
+              <div id="scan-result-valid" class="hidden space-y-3">
+                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                  <div>
+                    <p class="font-bold text-xs">VALID PASS • CONFIRMED RSVP</p>
+                    <p class="text-[10px] text-emerald-600">Eligible for admission</p>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5 pt-1">
+                  <p><span class="text-slate-400">Attendee:</span> <b id="res-student-name" class="text-brandNavy"></b></p>
+                  <p><span class="text-slate-400">College:</span> <span id="res-student-college" class="text-slate-600"></span></p>
+                  <p><span class="text-slate-400">Event:</span> <b id="res-event-name" class="text-brandNavy"></b></p>
+                  <p><span class="text-slate-400">Reg ID:</span> <span id="res-reg-id" class="font-mono font-bold text-brandNavy"></span></p>
+                  <p><span class="text-slate-400">Tier:</span> <span id="res-seat-tier" class="font-semibold text-brandBlue"></span></p>
+                </div>
+
+                <button 
+                  type="button" 
+                  id="btn-admit-scanned" 
+                  onclick="handleAdmitScannedAttendee()" 
+                  class="w-full mt-3 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-sm"
+                >
+                  ✓ Admit & Check In Attendee
+                </button>
+              </div>
+
+              <!-- Result: Already Checked In -->
+              <div id="scan-result-duplicate" class="hidden space-y-3">
+                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-300">
+                  <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0">⚠️</span>
+                  <div>
+                    <p class="font-bold text-xs">ALREADY CHECKED IN</p>
+                    <p class="text-[10px] text-amber-700">Duplicate admission rejected</p>
+                  </div>
+                </div>
+                <p class="text-[11px] text-slate-500">
+                  This pass was already scanned and admitted at:
+                  <b id="res-duplicate-time" class="block font-mono text-brandNavy mt-1"></b>
+                </p>
+                <div class="p-2 rounded-lg bg-red-50 text-red-700 text-[11px] font-bold text-center">
+                  Do not admit participant again.
+                </div>
+              </div>
+
+              <!-- Result: Invalid Token -->
+              <div id="scan-result-invalid" class="hidden space-y-3 text-center py-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-lg font-bold">
+                  ✕
+                </div>
+                <p class="font-bold text-xs text-red-600">INVALID / UNRECOGNIZED TOKEN</p>
+                <p class="text-[11px] text-slate-500">
+                  This token does not exist in confirmed registrations or has been revoked.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Ticket Registry Table -->
+        <div class="bg-white rounded-2xl border border-brandBorder shadow-card overflow-hidden">
+          <div class="p-4 border-b border-brandBorder flex items-center justify-between">
+            <h3 class="font-heading font-extrabold text-sm text-brandNavy">Issued Tickets Registry</h3>
+            <span class="text-xs text-slate-400">All registered passes have unique cryptographically bound QR tokens</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-brandBorder text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th class="py-3 px-4">Ticket / Pass ID</th>
+                  <th class="py-3 px-4">Attendee</th>
+                  <th class="py-3 px-4">Event</th>
+                  <th class="py-3 px-4">Seat Tier</th>
+                  <th class="py-3 px-4">QR Token Preview</th>
+                  <th class="py-3 px-4">Pass Status</th>
+                  <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-table-body" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= 7. ANALYTICS & REPORTS TAB ================= -->
+      <section id="tab-analytics" class="tab-content hidden space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              Event Analytics & Performance
+            </h2>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Insights into student engagement, registration velocity, and attendance benchmarks.
+            </p>
+          </div>
+          <button 
+            onclick="downloadAnalyticsReport()" 
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-brandBorder hover:bg-slate-50 text-brandNavy font-bold text-xs shadow-xs w-fit"
+          >
+            <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>Download Summary Report</span>
+          </button>
+        </div>
+
+        <!-- 3 Analytics Visual Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Chart 1: Registration Trajectory (8 cols) -->
+          <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-heading font-extrabold text-sm text-brandNavy">Weekly Registration Trajectory</h3>
+                <p class="text-[11px] text-brandSlate">RSVPs collected across all events over the last 6 weeks.</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                +24% Growth
+              </span>
+            </div>
+
+            <!-- SVG Visual Bar Chart -->
+            <div class="pt-4">
+              <div class="h-48 flex items-end justify-between gap-4 px-2">
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-slate-400 font-semibold">140</span>
+                  <div class="w-full bg-brandIce hover:bg-brandBlue rounded-t-lg transition-colors" style="height: 35%;"></div>
+                  <span class="text-[10px] text-slate-500">W1</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-slate-400 font-semibold">210</span>
+                  <div class="w-full bg-brandIce hover:bg-brandBlue rounded-t-lg transition-colors" style="height: 52%;"></div>
+                  <span class="text-[10px] text-slate-500">W2</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-slate-400 font-semibold">280</span>
+                  <div class="w-full bg-brandIce hover:bg-brandBlue rounded-t-lg transition-colors" style="height: 70%;"></div>
+                  <span class="text-[10px] text-slate-500">W3</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-slate-400 font-semibold">320</span>
+                  <div class="w-full bg-brandIce hover:bg-brandBlue rounded-t-lg transition-colors" style="height: 80%;"></div>
+                  <span class="text-[10px] text-slate-500">W4</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-slate-400 font-semibold">390</span>
+                  <div class="w-full bg-brandIce hover:bg-brandBlue rounded-t-lg transition-colors" style="height: 94%;"></div>
+                  <span class="text-[10px] text-slate-500">W5</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <span class="text-[10px] text-brandNavy font-bold">425</span>
+                  <div class="w-full bg-brandNavy rounded-t-lg transition-colors" style="height: 100%;"></div>
+                  <span class="text-[10px] font-bold text-brandNavy">W6</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 2: Attendance Rate (4 cols) -->
+          <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4 flex flex-col justify-between">
+            <div>
+              <h3 class="font-heading font-extrabold text-sm text-brandNavy">Attendance Conversion</h3>
+              <p class="text-[11px] text-brandSlate">Registered vs Confirmed Physical Attendance.</p>
+            </div>
+
+            <!-- Visual Circular Rate -->
+            <div class="text-center py-4">
+              <div class="w-28 h-28 rounded-full border-8 border-brandIce border-t-brandNavy flex items-center justify-center mx-auto">
+                <span class="font-heading font-extrabold text-2xl text-brandNavy">63.2%</span>
+              </div>
+              <p class="text-xs font-bold text-brandNavy mt-3">High Attendance Ratio</p>
+              <p class="text-[11px] text-slate-400">Average across campus events</p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1.5 border border-slate-100">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Registered:</span>
+                <span class="font-bold text-brandNavy">1,579 Students</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Admitted at Gates:</span>
+                <span class="font-bold text-emerald-600">425 Checked In</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Event Breakdown Leaderboard -->
+        <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card space-y-4">
+          <h3 class="font-heading font-extrabold text-sm text-brandNavy">Event Registration Leaderboard</h3>
+          <div class="space-y-3" id="analytics-events-bars">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= 8. ORGANISER PROFILE TAB ================= -->
+      <section id="tab-profile" class="tab-content hidden space-y-6">
+        
+        <div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+            Organiser Profile & Organisation Settings
+          </h2>
+          <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+            Manage your public club branding, verified contact info, and team permissions.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-brandBorder shadow-card max-w-2xl space-y-6">
+          
+          <!-- Avatar & Header -->
+          <div class="flex items-center gap-4 pb-6 border-b border-brandBorder">
+            <div class="w-16 h-16 rounded-2xl bg-brandNavy text-brandBlue flex items-center justify-center font-bold text-2xl shadow-sm">
+              SC
+            </div>
+            <div>
+              <h3 id="profile-display-name" class="font-heading font-extrabold text-lg text-brandNavy">Sarah Chen</h3>
+              <p id="profile-display-club" class="text-xs text-brandSlate">TechNova Club • Event Organiser</p>
+              <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                Verified Club Chapter
+              </span>
+            </div>
+          </div>
+
+          <!-- Profile Form -->
+          <form onsubmit="handleSaveProfile(event)" class="space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-brandNavy mb-1">Organiser Full Name</label>
+                <input 
+                  type="text" 
+                  id="profile-input-name" 
+                  value="Sarah Chen" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                />
+              </div>
+
+              <div>
+                <label class="block font-bold text-brandNavy mb-1">Organisation / Society Name</label>
+                <input 
+                  type="text" 
+                  id="profile-input-club" 
+                  value="TechNova Club" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                />
+              </div>
+
+              <div>
+                <label class="block font-bold text-brandNavy mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  id="profile-input-email" 
+                  value="organiser@campus.edu" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                />
+              </div>
+
+              <div>
+                <label class="block font-bold text-brandNavy mb-1">Contact Phone</label>
+                <input 
+                  type="tel" 
+                  id="profile-input-phone" 
+                  value="+1 (555) 234-5678" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block font-bold text-brandNavy mb-1">Organisation Bio / Campus Role</label>
+                <textarea 
+                  id="profile-input-bio" 
+                  rows="3" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                >TechNova Club is a leading campus technology organisation fostering collegiate hackathons, developer seminars, and startup incubations for aspiring builders.</textarea>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block font-bold text-brandNavy mb-1">Website or Social URL</label>
+                <input 
+                  type="url" 
+                  id="profile-input-website" 
+                  value="https://technovaclub.campus.edu" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue"
+                />
+              </div>
+            </div>
+
+            <div class="pt-4 flex justify-end">
+              <button 
+                type="submit" 
+                class="px-6 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-sm btn-spring"
+              >
+                Save Profile Changes
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- ================= MODAL: EVENT DETAILS ================= -->
+  <div id="org-event-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brandBorder animate-in fade-in zoom-in-95 duration-200">
+      
+      <button onclick="closeOrgEventModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold z-10 transition-colors">
+        ✕
+      </button>
+
+      <div class="relative h-44 overflow-hidden bg-slate-900">
+        <img id="modal-org-event-img" src="" alt="Event banner" class="w-full h-full object-cover opacity-80"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-brandNavy via-brandNavy/40 to-transparent p-5 flex flex-col justify-end">
+          <span id="modal-org-event-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold w-fit bg-white text-brandNavy mb-1.5"></span>
+          <h3 id="modal-org-event-title" class="font-heading font-extrabold text-xl text-white"></h3>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div class="flex flex-wrap items-center gap-4 text-brandSlate border-b border-brandBorder pb-3">
+          <span id="modal-org-event-date" class="font-semibold text-brandNavy"></span>
+          <span id="modal-org-event-venue" class="font-semibold text-brandNavy"></span>
+        </div>
+
+        <div>
+          <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</h4>
+          <p id="modal-org-event-desc" class="text-brandNavy mt-1 leading-relaxed"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+          <div>
+            <span class="text-slate-400 text-[10px]">Total Registrations:</span>
+            <p id="modal-org-event-regs" class="font-bold text-sm text-brandNavy"></p>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[10px]">Check-in Count:</span>
+            <p id="modal-org-event-checkins" class="font-bold text-sm text-emerald-600"></p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-3">
+          <button 
+            type="button"
+            id="modal-btn-change-banner" 
+            onclick="closeOrgEventModal(); openChangeBannerModal(currentActiveModalEventId);" 
+            class="flex-1 py-2.5 rounded-xl bg-brandIce hover:bg-[#cbe2f8] text-brandNavy font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+          >
+            <span>🖼️ Change Banner</span>
+          </button>
+          <button onclick="closeOrgEventModal()" class="flex-1 py-2.5 rounded-xl bg-brandNavy text-white font-bold text-xs transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: CHANGE EVENT BANNER ================= -->
+  <div id="modal-change-banner" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brandBorder animate-in fade-in zoom-in-95 duration-200">
+      
+      <button onclick="closeChangeBannerModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold z-10 transition-colors">
+        ✕
+      </button>
+
+      <div class="p-6 space-y-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-brandIce text-brandNavy text-[10px] font-bold">Banner Customization</span>
+          <h3 id="modal-banner-event-title" class="font-heading font-extrabold text-xl text-brandNavy mt-1">Change Event Banner</h3>
+          <p class="text-xs text-brandSlate">Upload your custom banner photo, pick a sports theme, or paste any image link.</p>
+        </div>
+
+        <!-- Banner Source Tabs -->
+        <div class="flex gap-2">
+          <button 
+            type="button" 
+            id="modal-banner-tab-upload"
+            onclick="switchModalBannerSource('upload')" 
+            class="flex-1 py-1.5 rounded-lg bg-brandNavy text-white font-bold text-xs shadow-xs text-center transition-colors"
+          >
+            📁 Device File
+          </button>
+          <button 
+            type="button" 
+            id="modal-banner-tab-presets"
+            onclick="switchModalBannerSource('presets')" 
+            class="flex-1 py-1.5 rounded-lg bg-white border border-slate-200 text-brandSlate hover:text-brandNavy font-semibold text-xs text-center transition-colors"
+          >
+            🎨 Sports Presets
+          </button>
+          <button 
+            type="button" 
+            id="modal-banner-tab-url"
+            onclick="switchModalBannerSource('url')" 
+            class="flex-1 py-1.5 rounded-lg bg-white border border-slate-200 text-brandSlate hover:text-brandNavy font-semibold text-xs text-center transition-colors"
+          >
+            🔗 Web Link
+          </button>
+        </div>
+
+        <!-- 1. Upload Option -->
+        <div id="modal-banner-view-upload" class="space-y-2">
+          <div 
+            onclick="document.getElementById('modal-banner-file-input').click()"
+            ondragover="event.preventDefault(); this.classList.add('border-brandBlue', 'bg-sky-50/50');"
+            ondragleave="this.classList.remove('border-brandBlue', 'bg-sky-50/50')"
+            ondrop="event.preventDefault(); this.classList.remove('border-brandBlue', 'bg-sky-50/50'); handleBannerFileDrop(event, 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+            class="border-2 border-dashed border-slate-300 hover:border-brandBlue rounded-xl p-5 text-center cursor-pointer transition-colors bg-white group"
+          >
+            <p class="text-xs font-bold text-brandNavy">Click to choose image or drag & drop here</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">PNG, JPG, WEBP formats accepted</p>
+          </div>
+          <input 
+            type="file" 
+            id="modal-banner-file-input" 
+            accept="image/*" 
+            class="hidden" 
+            onchange="handleBannerFileSelect(this, 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+          />
+        </div>
+
+        <!-- 2. Sports & Campus Presets -->
+        <div id="modal-banner-view-presets" class="hidden space-y-2">
+          <div class="grid grid-cols-3 gap-2">
+            <button 
+              type="button" 
+              onclick="applyBannerPreset('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80', 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+              class="p-1.5 rounded-lg border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-[11px]"
+            >
+              <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=200&q=80" class="w-full h-12 object-cover rounded mb-1"/>
+              <span class="font-bold text-brandNavy block truncate">🏃 Track Athletics</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="applyBannerPreset('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80', 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+              class="p-1.5 rounded-lg border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-[11px]"
+            >
+              <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=200&q=80" class="w-full h-12 object-cover rounded mb-1"/>
+              <span class="font-bold text-brandNavy block truncate">🏀 Basketball</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="applyBannerPreset('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80', 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+              class="p-1.5 rounded-lg border border-slate-200 hover:border-brandNavy bg-white text-left transition-all text-[11px]"
+            >
+              <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=200&q=80" class="w-full h-12 object-cover rounded mb-1"/>
+              <span class="font-bold text-brandNavy block truncate">⚽ Football</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. URL Input -->
+        <div id="modal-banner-view-url" class="hidden space-y-2">
+          <input 
+            type="text" 
+            id="modal-banner-url-input" 
+            placeholder="Paste direct image URL or search link..." 
+            class="w-full px-4 py-2.5 rounded-xl border border-brandBorder text-xs text-brandNavy focus:outline-none focus:ring-2 focus:ring-brandBlue bg-white"
+            oninput="handleBannerUrlInput(this.value, 'modal-banner-value', 'modal-banner-preview-img', 'modal-banner-preview-box')"
+          />
+        </div>
+
+        <!-- Hidden value for banner -->
+        <input type="hidden" id="modal-banner-value" value="" />
+        <input type="hidden" id="modal-banner-event-id" value="" />
+
+        <!-- Live Preview -->
+        <div id="modal-banner-preview-box" class="relative h-32 rounded-xl overflow-hidden border border-brandBorder bg-slate-100">
+          <img id="modal-banner-preview-img" src="" class="w-full h-full object-cover" />
+          <div class="absolute bottom-2 left-2 bg-brandNavy/80 px-2.5 py-1 rounded-md text-[10px] text-white font-bold">
+            Live Preview
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="pt-2 flex gap-3">
+          <button 
+            type="button" 
+            onclick="closeChangeBannerModal()" 
+            class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            onclick="handleSaveEventBannerModal()" 
+            class="flex-1 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-sm"
+          >
+            Save Banner
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: TEST STUDENT PASS QR ================= -->
+  <div id="modal-sample-pass" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-brandBorder animate-in fade-in zoom-in-95 duration-200">
+      
+      <button onclick="closeSamplePassModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold z-10 transition-colors">
+        ✕
+      </button>
+
+      <div class="p-6 text-center space-y-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Confirmed Student Ticket</span>
+          <h3 id="sample-pass-event" class="font-heading font-extrabold text-lg text-brandNavy mt-1">sportii</h3>
+          <p class="text-xs text-slate-500">Scan this QR code with the live camera scanner or phone camera</p>
+        </div>
+
+        <!-- Rendered QR Box -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center shadow-inner">
+          <img id="sample-pass-qr-img" src="" alt="Ticket QR" class="w-48 h-48 rounded-xl bg-white p-2 border border-slate-200 shadow-sm" />
+          <p id="sample-pass-id" class="font-mono font-bold text-xs text-brandNavy mt-2.5 tracking-wider"></p>
+          <p id="sample-pass-token" class="font-mono text-[10px] text-slate-400 mt-0.5"></p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-3 text-left text-xs space-y-1 border border-slate-100">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Student:</span>
+            <b id="sample-pass-student" class="text-brandNavy">Alex Johnson</b>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Pass Tier:</span>
+            <span id="sample-pass-tier" class="font-bold text-brandBlue">Athlete Entry Pass</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Status:</span>
+            <span id="sample-pass-status" class="font-bold text-emerald-600">Valid • Ready for Admission</span>
+          </div>
+        </div>
+
+        <div class="pt-1 flex gap-2">
+          <button 
+            type="button" 
+            onclick="simulateScanFromSamplePass()" 
+            class="flex-1 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white font-bold text-xs transition-colors shadow-sm"
+          >
+            ⚡ Test Scan This Pass
+          </button>
+          <button 
+            type="button" 
+            onclick="closeSamplePassModal()" 
+            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= TOAST CONTAINER ================= -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Organiser Dashboard Script -->
+  <script src="/organiser-dashboard.js"></script>
+
+</body>
+</html>

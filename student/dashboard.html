@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventify — Student Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23172B45'%3E%3Cpath d='M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z'/%3E%3C/svg%3E" />
+
+  <!-- Google Fonts: Manrope, DM Sans, and DM Serif Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pageBg: '#EDF4FA',
+            brandNavy: '#172B45',
+            brandBlue: '#83C5F7',
+            brandIce: '#DCEBFA',
+            brandSlate: '#66788C',
+            brandBorder: '#E2EAF2',
+            bannerBg: '#DDF0FC',
+            bannerBorder: '#CFE5F8'
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            heading: ['Manrope', 'sans-serif'],
+            serif: ['DM Serif Display', 'serif']
+          },
+          boxShadow: {
+            subtle: '0 2px 8px -2px rgba(23, 43, 69, 0.05), 0 1px 4px -1px rgba(23, 43, 69, 0.03)',
+            card: '0 4px 16px -2px rgba(23, 43, 69, 0.06), 0 2px 6px -2px rgba(23, 43, 69, 0.03)',
+            elevated: '0 12px 30px -4px rgba(23, 43, 69, 0.12), 0 4px 10px -2px rgba(23, 43, 69, 0.05)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #edf4fa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3d7ea;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9abedb;
+    }
+
+    /* Spring animations */
+    .btn-spring {
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-spring:active {
+      transform: scale(0.97);
+    }
+
+    .card-hover {
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px -4px rgba(23, 43, 69, 0.08);
+      border-color: #bcd4ea;
+    }
+
+    /* Print Ticket styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-ticket-content, #printable-ticket-content * {
+        visibility: visible;
+      }
+      #printable-ticket-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-pageBg text-brandNavy font-sans min-h-screen flex antialiased selection:bg-brandIce selection:text-brandNavy">
+
+  <!-- ================= FIXED LEFT SIDEBAR ================= -->
+  <!-- Mobile Backdrop Overlay -->
+  <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="hidden md:hidden fixed inset-0 bg-brandNavy/50 z-30 transition-opacity"></div>
+
+  <aside id="sidebar-drawer" class="w-60 lg:w-64 bg-white border-r border-brandBorder flex flex-col justify-between fixed top-0 bottom-0 left-0 z-40 select-none -translate-x-full md:translate-x-0 transition-transform duration-200">
+    
+    <!-- Top Branding & Navigation -->
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-20 px-6 flex items-center border-b border-transparent">
+        <a href="javascript:void(0)" onclick="switchView('dashboard')" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-brandNavy flex items-center justify-center text-brandBlue shadow-xs group-hover:scale-105 transition-transform">
+            <!-- 4-point star icon -->
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+            </svg>
+          </div>
+          <span class="font-heading font-extrabold text-xl tracking-tight text-brandNavy">
+            Eventify
+          </span>
+        </a>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="px-3.5 py-4 space-y-1.5" aria-label="Student Navigation">
+        <!-- 1. Dashboard -->
+        <button 
+          type="button"
+          id="nav-btn-dashboard"
+          onclick="switchView('dashboard')" 
+          class="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-brandIce text-brandNavy font-bold text-sm transition-all shadow-xs text-left"
+        >
+          <!-- Grid/Dashboard Icon -->
+          <svg class="w-5 h-5 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+
+        <!-- 2. Explore Events -->
+        <a 
+          href="/" 
+          class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-sm transition-colors group"
+        >
+          <!-- Search / Compass Icon -->
+          <svg class="w-5 h-5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <span>Explore Events</span>
+        </a>
+
+        <!-- 3. My Registrations -->
+        <button 
+          type="button" 
+          id="nav-btn-registrations"
+          onclick="switchView('registrations')"
+          class="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-sm transition-colors text-left group"
+        >
+          <!-- Calendar / Ticket Icon -->
+          <svg class="w-5 h-5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>My Registrations</span>
+        </button>
+
+        <!-- 4. Saved Events -->
+        <button 
+          type="button" 
+          onclick="toggleSavedEventsView()" 
+          class="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-sm transition-colors text-left group"
+        >
+          <!-- Bookmark Icon -->
+          <svg class="w-5 h-5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+          <span>Saved Events</span>
+        </button>
+
+        <!-- 5. My Profile -->
+        <button 
+          type="button" 
+          onclick="openProfileModal()" 
+          class="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-brandSlate hover:text-brandNavy hover:bg-slate-50 font-medium text-sm transition-colors text-left group"
+        >
+          <!-- User Icon -->
+          <svg class="w-5 h-5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span>My Profile</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Bottom Actions: Logout -->
+    <div class="p-4 border-t border-brandBorder">
+      <button 
+        type="button" 
+        onclick="handleLogout()" 
+        class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-brandSlate hover:text-red-600 hover:bg-red-50 font-medium text-sm transition-colors text-left group"
+      >
+        <!-- Logout Icon -->
+        <svg class="w-5 h-5 text-slate-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- ================= MAIN WRAPPER ================= -->
+  <div class="flex-1 md:ml-60 lg:ml-64 flex flex-col min-h-screen">
+    
+    <!-- ================= TOP NAVIGATION BAR ================= -->
+    <header class="h-20 bg-pageBg border-b border-brandBorder/60 sticky top-0 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between backdrop-blur-md">
+      
+      <!-- Mobile Sidebar Toggle -->
+      <button 
+        type="button" 
+        onclick="toggleMobileSidebar()" 
+        class="md:hidden mr-3 p-2 rounded-xl text-brandNavy hover:bg-white/80 transition-colors"
+        aria-label="Toggle navigation menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <!-- Search Bar -->
+      <div class="relative w-full max-w-xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="dashboard-search-input"
+          oninput="handleSearch(this.value)"
+          placeholder="Search events, hackathons, workshops..." 
+          class="w-full pl-10 pr-4 py-2.5 bg-white border border-brandBorder rounded-full text-xs md:text-sm text-brandNavy placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brandBlue/40 focus:border-brandBlue transition-all shadow-subtle"
+        />
+        <button 
+          id="clear-search-btn"
+          onclick="clearSearch()"
+          class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-brandNavy text-xs"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Right Header Actions: Notification & Student Profile -->
+      <div class="flex items-center gap-5 ml-4">
+        
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button 
+            type="button" 
+            onclick="toggleNotifications()"
+            class="p-2 rounded-full text-brandNavy hover:bg-white/80 transition-colors relative" 
+            aria-label="View notifications"
+          >
+            <svg class="w-5 h-5 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <!-- Red notification dot -->
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border border-white"></span>
+          </button>
+
+          <!-- Notification Dropdown -->
+          <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-elevated border border-brandBorder p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-3 border-b border-brandBorder">
+              <span class="text-xs font-bold uppercase tracking-wider text-brandNavy">Notifications</span>
+              <span class="text-[10px] font-semibold text-brandBlue cursor-pointer" onclick="markAllNotificationsRead()">Mark read</span>
+            </div>
+            <div class="mt-3 space-y-2.5">
+              <div class="flex items-start gap-2.5 p-2 rounded-xl bg-blue-50/50">
+                <div class="w-2 h-2 rounded-full bg-brandBlue mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="text-xs font-semibold text-brandNavy">National Hackathon 2027 Pass Active</p>
+                  <p class="text-[11px] text-slate-500">Registration ID: EVT-2027-001. Scannable pass ready.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                <div class="w-2 h-2 rounded-full bg-slate-300 mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="text-xs font-semibold text-brandNavy">Campus Cultural Fest</p>
+                  <p class="text-[11px] text-slate-500">Stage passes and entry badge confirmed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Profile Avatar & Name -->
+        <div class="relative">
+          <button 
+            type="button" 
+            onclick="toggleUserDropdown()" 
+            class="flex items-center gap-2.5 pl-2 pr-1 py-1 rounded-full hover:bg-white/80 transition-colors group"
+          >
+            <!-- Brown Circle Avatar with 'G' (Initial) -->
+            <div id="user-avatar-circle" class="w-8 h-8 rounded-full bg-[#A3664C] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              G
+            </div>
+            <span id="user-nav-name" class="text-sm font-bold text-brandNavy hidden sm:inline">
+              Gautam
+            </span>
+            <!-- Small chevron -->
+            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brandNavy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <!-- User Menu Dropdown -->
+          <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-elevated border border-brandBorder py-2 z-50">
+            <div class="px-4 py-2.5 border-b border-brandBorder">
+              <p id="dropdown-user-name" class="text-sm font-bold text-brandNavy">Gautam</p>
+              <p id="dropdown-user-email" class="text-xs text-brandSlate truncate">gautam@campus.edu</p>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-brandIce text-brandNavy">Student</span>
+            </div>
+            <a href="/" class="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>Eventify Home</span>
+            </a>
+            <button onclick="switchView('registrations'); closeUserDropdown();" class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+              </svg>
+              <span>My Event Passes</span>
+            </button>
+            <button onclick="openProfileModal()" class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-brandSlate hover:text-brandNavy hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <span>View Profile</span>
+            </button>
+            <div class="border-t border-brandBorder my-1"></div>
+            <button onclick="handleLogout()" class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ================= MAIN DASHBOARD VIEWS ================= -->
+    <main class="flex-1 p-6 lg:p-8">
+      
+      <!-- ================= VIEW 1: MAIN BENTO DASHBOARD ================= -->
+      <div id="view-dashboard" class="space-y-6">
+        
+        <!-- 2-COLUMN GRID (Left: Central Content 68% | Right: Activity Panels 32%) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- ================= LEFT / CENTRAL COLUMN (Col 1 to 8) ================= -->
+          <div class="lg:col-span-8 space-y-6">
+            
+            <!-- 1. WELCOME BANNER -->
+            <div class="relative overflow-hidden bg-bannerBg border border-bannerBorder rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-subtle">
+              <!-- Left Text -->
+              <div class="max-w-md z-10">
+                <h1 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+                  Hey, welcome back! <span class="inline-block transform hover:rotate-12 transition-transform cursor-default">👋</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-[#4E677F] mt-2 font-normal leading-relaxed">
+                  Ready to discover something exciting? Explore events happening around you.
+                </p>
+              </div>
+
+              <!-- Right Vector Illustration (Person at laptop + calendar) -->
+              <div class="relative shrink-0 w-44 h-32 flex items-center justify-center">
+                <div class="absolute -right-4 -bottom-4 w-40 h-40 rounded-full bg-[#CCE6F9]/60 pointer-events-none"></div>
+                
+                <svg class="w-40 h-32 relative z-10" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="10" y="115" width="180" height="6" rx="3" fill="#A8CEE8"/>
+                  <g class="drop-shadow-xs">
+                    <rect x="125" y="20" width="46" height="42" rx="6" fill="#FFFFFF" stroke="#83C5F7" stroke-width="1.8"/>
+                    <path d="M125 32H171" stroke="#83C5F7" stroke-width="1.8"/>
+                    <rect x="135" y="15" width="4" height="8" rx="2" fill="#172B45"/>
+                    <rect x="157" y="15" width="4" height="8" rx="2" fill="#172B45"/>
+                    <circle cx="140" cy="42" r="2" fill="#83C5F7"/>
+                    <circle cx="150" cy="42" r="2" fill="#83C5F7"/>
+                    <circle cx="160" cy="42" r="2" fill="#83C5F7"/>
+                    <circle cx="140" cy="50" r="2" fill="#83C5F7"/>
+                    <circle cx="150" cy="50" r="2.5" fill="#172B45"/>
+                  </g>
+                  <circle cx="68" cy="48" r="13" fill="#D39276"/>
+                  <path d="M56 46C56 36 63 35 72 35C80 35 82 41 81 48C76 44 64 45 56 46Z" fill="#172B45"/>
+                  <path d="M50 78C50 66 58 64 68 64C78 64 86 66 86 78V115H50V78Z" fill="#172B45"/>
+                  <rect x="38" y="88" width="56" height="26" rx="4" fill="#83C5F7" stroke="#172B45" stroke-width="1.5"/>
+                  <path d="M30 114H102" stroke="#172B45" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="48" cy="98" r="3.5" fill="#D39276"/>
+                  <circle cx="86" cy="98" r="3.5" fill="#D39276"/>
+                </svg>
+              </div>
+            </div>
+
+
+            <!-- 2. FEATURED EVENT BANNER -->
+            <div class="relative rounded-2xl overflow-hidden shadow-card group">
+              <img 
+                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80" 
+                onerror="this.src='/assets/evt_hackathon.jpg'"
+                alt="National Hackathon 2027" 
+                class="w-full h-72 md:h-80 object-cover object-center group-hover:scale-102 transition-transform duration-500 ease-out"
+              />
+              
+              <div class="absolute inset-0 bg-gradient-to-r from-[#0F2038]/95 via-[#0F2038]/80 to-[#0F2038]/25 flex flex-col justify-between p-6 sm:p-8">
+                <div>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold tracking-wider uppercase border border-white/20">
+                    FEATURED EVENT
+                  </span>
+                </div>
+
+                <div class="max-w-lg">
+                  <h2 class="font-serif text-2xl sm:text-3xl lg:text-[32px] font-bold text-white tracking-tight leading-tight">
+                    National Hackathon 2027
+                  </h2>
+                  <p class="text-xs sm:text-sm text-blue-100/90 mt-2 font-normal">
+                    Build, innovate and compete with talented students.
+                  </p>
+
+                  <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-white/85 mt-3.5">
+                    <div class="flex items-center gap-1.5">
+                      <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      <span>15–16 February 2027</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      <span>Bengaluru</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-5">
+                    <button 
+                      type="button" 
+                      onclick="openEventDetailsModal('hackathon')" 
+                      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-brandNavy font-bold text-xs sm:text-sm hover:bg-brandBlue hover:text-brandNavy transition-all shadow-md btn-spring group"
+                    >
+                      <span>Explore Event</span>
+                      <span class="transform group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+
+            <!-- 3. EXPLORE BY INTEREST SECTION (Exact user requirement) -->
+            <div class="bg-white rounded-2xl p-5 sm:p-6 border border-brandBorder shadow-card">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-heading font-extrabold text-base sm:text-lg text-brandNavy tracking-tight">
+                    Explore by Interest
+                  </h3>
+                  <p class="text-xs text-brandSlate mt-0.5">
+                    Discover events curated by campus community passions.
+                  </p>
+                </div>
+                <a href="/" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+                  All Interests →
+                </a>
+              </div>
+
+              <!-- 8 Categories Grid -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <a href="/#category-tech" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">💻</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Technology</span>
+                </a>
+                <a href="/#category-hackathons" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">⚡</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Hackathons</span>
+                </a>
+                <a href="/#category-cultural" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">🎭</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Cultural & Arts</span>
+                </a>
+                <a href="/#category-sports" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">🏆</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Sports</span>
+                </a>
+                <a href="/#category-workshops" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">🛠️</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Workshops</span>
+                </a>
+                <a href="/#category-business" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">💼</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Business</span>
+                </a>
+                <a href="/#category-design" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">🎨</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Design</span>
+                </a>
+                <a href="/#category-science" class="flex items-center gap-2.5 p-2.5 rounded-xl border border-brandBorder/80 hover:border-brandBlue hover:bg-blue-50/40 transition-all group">
+                  <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">🔬</span>
+                  <span class="text-xs font-bold text-brandNavy group-hover:text-brandBlue">Science</span>
+                </a>
+              </div>
+            </div>
+
+
+            <!-- 4. RECOMMENDED FOR YOU SECTION -->
+            <div class="bg-white rounded-2xl p-6 border border-brandBorder shadow-card">
+              
+              <!-- Section Header -->
+              <div class="mb-5">
+                <div class="flex items-center gap-2">
+                  <span class="text-brandBlue text-lg leading-none">☆</span>
+                  <h3 class="font-heading font-extrabold text-base sm:text-lg text-brandNavy tracking-tight">
+                    Recommended for You
+                  </h3>
+                </div>
+                <p class="text-xs text-brandSlate mt-0.5 ml-6">
+                  Events selected based on your interests.
+                </p>
+              </div>
+
+              <!-- 3 Event Cards Horizontal Row -->
+              <div id="recommended-events-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                
+                <!-- Card 1: AI Innovation Summit -->
+                <div class="event-card-item rounded-xl border border-brandBorder/80 bg-white overflow-hidden flex flex-col justify-between card-hover" data-category="technology" data-title="AI Innovation Summit">
+                  <div>
+                    <div class="relative h-36 overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80" 
+                        onerror="this.src='/assets/cat_tech.jpg'"
+                        alt="AI Innovation Summit" 
+                        class="w-full h-full object-cover"
+                      />
+                      <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-bold text-sky-700 shadow-xs">
+                        Technology
+                      </span>
+                    </div>
+                    <div class="p-3.5">
+                      <h4 class="font-heading font-bold text-sm text-brandNavy line-clamp-1">
+                        AI Innovation Summit
+                      </h4>
+                      <div class="flex items-center gap-2.5 text-[11px] text-slate-500 mt-1.5">
+                        <span>📅 20 February 2027</span>
+                        <span>📍 Bengaluru</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="px-3.5 pb-3.5 pt-1 flex items-center justify-between border-t border-slate-100">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span>Registration Open</span>
+                    </span>
+                    <button 
+                      type="button" 
+                      onclick="openEventDetailsModal('ai-summit')" 
+                      class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors"
+                    >
+                      View Details →
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card 2: Campus Cultural Fest -->
+                <div class="event-card-item rounded-xl border border-brandBorder/80 bg-white overflow-hidden flex flex-col justify-between card-hover" data-category="cultural" data-title="Campus Cultural Fest">
+                  <div>
+                    <div class="relative h-36 overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80" 
+                        onerror="this.src='/assets/evt_cultural.jpg'"
+                        alt="Campus Cultural Fest" 
+                        class="w-full h-full object-cover"
+                      />
+                      <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-bold text-indigo-700 shadow-xs">
+                        Cultural
+                      </span>
+                    </div>
+                    <div class="p-3.5">
+                      <h4 class="font-heading font-bold text-sm text-brandNavy line-clamp-1">
+                        Campus Cultural Fest
+                      </h4>
+                      <div class="flex items-center gap-2.5 text-[11px] text-slate-500 mt-1.5">
+                        <span>📅 25 February 2027</span>
+                        <span>📍 Bengaluru</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="px-3.5 pb-3.5 pt-1 flex items-center justify-between border-t border-slate-100">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span>Registration Open</span>
+                    </span>
+                    <button 
+                      type="button" 
+                      onclick="openEventDetailsModal('cultural-fest')" 
+                      class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors"
+                    >
+                      View Details →
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card 3: Startup Pitch Challenge -->
+                <div class="event-card-item rounded-xl border border-brandBorder/80 bg-white overflow-hidden flex flex-col justify-between card-hover" data-category="entrepreneurship" data-title="Startup Pitch Challenge">
+                  <div>
+                    <div class="relative h-36 overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=600&q=80" 
+                        onerror="this.src='/assets/tr_creators.jpg'"
+                        alt="Startup Pitch Challenge" 
+                        class="w-full h-full object-cover"
+                      />
+                      <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-bold text-cyan-700 shadow-xs">
+                        Entrepreneurship
+                      </span>
+                    </div>
+                    <div class="p-3.5">
+                      <h4 class="font-heading font-bold text-sm text-brandNavy line-clamp-1">
+                        Startup Pitch Challenge
+                      </h4>
+                      <div class="flex items-center gap-2.5 text-[11px] text-slate-500 mt-1.5">
+                        <span>📅 2 March 2027</span>
+                        <span>📍 Bengaluru</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="px-3.5 pb-3.5 pt-1 flex items-center justify-between border-t border-slate-100">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                      <span>Limited Seats</span>
+                    </span>
+                    <button 
+                      type="button" 
+                      onclick="openEventDetailsModal('pitch-challenge')" 
+                      class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors"
+                    >
+                      View Details →
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Empty Search State -->
+              <div id="no-search-results" class="hidden text-center py-8">
+                <p class="text-sm font-semibold text-brandNavy">No matching events found</p>
+                <p class="text-xs text-brandSlate mt-1">Try searching for hackathons, summits, or workshops.</p>
+                <button onclick="clearSearch()" class="mt-3 text-xs font-bold text-brandBlue hover:underline">Reset Search</button>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================= RIGHT-SIDE COLUMN (Col 9 to 12) ================= -->
+          <div class="lg:col-span-4 space-y-6">
+            
+            <!-- 1. MY ACTIVITY CARD -->
+            <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card">
+              <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <h3 class="font-heading font-extrabold text-sm text-brandNavy tracking-tight">
+                    My Activity
+                  </h3>
+                </div>
+                <button onclick="switchView('registrations')" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+                  View All →
+                </button>
+              </div>
+
+              <!-- 3 Circular Metrics Row -->
+              <div class="grid grid-cols-3 gap-2 pt-4 text-center">
+                
+                <!-- Metric 1: Registered Events -->
+                <div class="p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                  <div class="w-10 h-10 rounded-full bg-[#EBF3FB] text-brandNavy flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <div id="stat-registered-count" class="font-heading font-extrabold text-2xl text-brandNavy leading-none">
+                    04
+                  </div>
+                  <div class="text-[11px] text-brandSlate mt-1 font-medium leading-tight">
+                    Registered<br/>Events
+                  </div>
+                </div>
+
+                <!-- Metric 2: Saved Events -->
+                <div class="p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                  <div class="w-10 h-10 rounded-full bg-[#EBF3FB] text-brandNavy flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                    </svg>
+                  </div>
+                  <div id="stat-saved-count" class="font-heading font-extrabold text-2xl text-brandNavy leading-none">
+                    08
+                  </div>
+                  <div class="text-[11px] text-brandSlate mt-1 font-medium leading-tight">
+                    Saved<br/>Events
+                  </div>
+                </div>
+
+                <!-- Metric 3: Upcoming Events -->
+                <div class="p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                  <div class="w-10 h-10 rounded-full bg-[#EBF3FB] text-brandNavy flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div id="stat-upcoming-count" class="font-heading font-extrabold text-2xl text-brandNavy leading-none">
+                    02
+                  </div>
+                  <div class="text-[11px] text-brandSlate mt-1 font-medium leading-tight">
+                    Upcoming<br/>Events
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+
+            <!-- 2. MY EVENT PASSES CARD (WITH REAL 100% SCANNABLE QR CODE) -->
+            <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card">
+              <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-brandBlue text-base leading-none">☆</span>
+                  <h3 class="font-heading font-extrabold text-sm text-brandNavy tracking-tight">
+                    My Event Passes
+                  </h3>
+                </div>
+                <button onclick="switchView('registrations')" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+                  View All →
+                </button>
+              </div>
+
+              <!-- Pass Preview Box (National Hackathon 2027 • EVT-2027-001) -->
+              <div class="mt-4 p-3 rounded-xl border border-brandBorder/80 bg-[#F9FBFE]">
+                <div class="flex items-start gap-3">
+                  
+                  <!-- Left: Thumbnail -->
+                  <img 
+                    src="/assets/evt_hackathon.jpg" 
+                    onerror="this.src='https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=150&q=80'"
+                    alt="National Hackathon 2027" 
+                    class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover shrink-0 border border-slate-200"
+                  />
+
+                  <!-- Center: Info -->
+                  <div class="flex-1 min-w-0">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span>Confirmed</span>
+                    </span>
+                    <h4 class="font-heading font-bold text-xs sm:text-sm text-brandNavy truncate mt-1">
+                      National Hackathon 2027
+                    </h4>
+                    <div class="text-[11px] text-slate-500 mt-0.5 space-y-0.5">
+                      <p class="truncate">📅 15–16 Feb, 2027</p>
+                      <p class="truncate">📍 Bengaluru</p>
+                    </div>
+                    <p class="text-[9px] text-slate-500 font-mono mt-1 font-semibold truncate">
+                      Registration ID: EVT-2027-001
+                    </p>
+                  </div>
+
+                  <!-- Right: REAL DYNAMIC SCANNABLE QR CODE -->
+                  <div class="shrink-0 text-center" title="Click to enlarge scannable pass">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 p-0.5 bg-white rounded-md border border-slate-200 shadow-2xs flex items-center justify-center cursor-pointer hover:border-brandBlue transition-colors" onclick="openPassModal('EVT-2027-001')">
+                      <img 
+                        id="widget-qr-img-001"
+                        src="/api/qr?text=http://localhost:3001/verify?token=tkn_sec_hack2027_001_8f9e" 
+                        alt="Scannable QR Code for EVT-2027-001" 
+                        class="w-full h-full object-contain"
+                      />
+                    </div>
+                    <span class="text-[8px] text-emerald-600 font-bold block mt-0.5">Scannable</span>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Action Buttons Row -->
+              <div class="mt-4 space-y-2">
+                <button 
+                  type="button" 
+                  onclick="openPassModal('EVT-2027-001')" 
+                  class="w-full py-2.5 rounded-xl bg-brandNavy text-white font-bold text-xs hover:bg-[#0f2038] transition-colors flex items-center justify-center gap-1.5 shadow-xs btn-spring"
+                >
+                  <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                  </svg>
+                  <span>View QR Pass</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="downloadPass('EVT-2027-001')" 
+                  class="w-full py-2 rounded-xl bg-white border border-brandBorder hover:border-brandNavy text-brandNavy font-bold text-xs hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5 btn-spring"
+                >
+                  <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                  </svg>
+                  <span>Download</span>
+                </button>
+              </div>
+
+            </div>
+
+
+            <!-- 3. YOUR UPCOMING EVENTS CARD -->
+            <div class="bg-white rounded-2xl p-5 border border-brandBorder shadow-card">
+              <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-brandNavy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <h3 class="font-heading font-extrabold text-sm text-brandNavy tracking-tight">
+                    Your Upcoming Events
+                  </h3>
+                </div>
+                <a href="/" class="text-xs font-bold text-brandNavy hover:text-brandBlue transition-colors">
+                  View All →
+                </a>
+              </div>
+
+              <!-- Vertical Event Rows -->
+              <div class="mt-3.5 space-y-3">
+                
+                <!-- Event Row 1 -->
+                <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onclick="openEventDetailsModal('hackathon')">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <img 
+                      src="/assets/evt_hackathon.jpg" 
+                      onerror="this.src='https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=150&q=80'"
+                      alt="National Hackathon 2027" 
+                      class="w-11 h-11 rounded-lg object-cover shrink-0"
+                    />
+                    <div class="min-w-0">
+                      <h4 class="font-heading font-bold text-xs text-brandNavy truncate group-hover:text-brandBlue transition-colors">
+                        National Hackathon 2027
+                      </h4>
+                      <p class="text-[10px] text-slate-500 truncate mt-0.5">
+                        📅 15–16 Feb, 2027 • 📍 Bengaluru
+                      </p>
+                    </div>
+                  </div>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold shrink-0">
+                    Confirmed
+                  </span>
+                </div>
+
+                <!-- Event Row 2 -->
+                <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onclick="openEventDetailsModal('cultural-fest')">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <img 
+                      src="/assets/evt_cultural.jpg" 
+                      onerror="this.src='https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=150&q=80'"
+                      alt="Campus Cultural Fest" 
+                      class="w-11 h-11 rounded-lg object-cover shrink-0"
+                    />
+                    <div class="min-w-0">
+                      <h4 class="font-heading font-bold text-xs text-brandNavy truncate group-hover:text-brandBlue transition-colors">
+                        Campus Cultural Fest
+                      </h4>
+                      <p class="text-[10px] text-slate-500 truncate mt-0.5">
+                        📅 25 Feb, 2027 • 📍 Bengaluru
+                      </p>
+                    </div>
+                  </div>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold shrink-0">
+                    Confirmed
+                  </span>
+                </div>
+
+                <!-- Event Row 3 -->
+                <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onclick="openEventDetailsModal('pitch-challenge')">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <img 
+                      src="/assets/tr_creators.jpg" 
+                      onerror="this.src='https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=150&q=80'"
+                      alt="Startup Pitch Challenge" 
+                      class="w-11 h-11 rounded-lg object-cover shrink-0"
+                    />
+                    <div class="min-w-0">
+                      <h4 class="font-heading font-bold text-xs text-brandNavy truncate group-hover:text-brandBlue transition-colors">
+                        Startup Pitch Challenge
+                      </h4>
+                      <p class="text-[10px] text-slate-500 truncate mt-0.5">
+                        📅 2 Mar, 2027 • 📍 Bengaluru
+                      </p>
+                    </div>
+                  </div>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold shrink-0">
+                    Pending
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= VIEW 2: MY REGISTRATIONS VIEW ================= -->
+      <div id="view-registrations" class="hidden space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-brandNavy tracking-tight">
+              My Registrations
+            </h1>
+            <p class="text-xs sm:text-sm text-brandSlate mt-1 font-normal">
+              Your confirmed event passes and verified QR check-in codes.
+            </p>
+          </div>
+          <button onclick="switchView('dashboard')" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-brandBorder text-brandNavy font-bold text-xs hover:bg-slate-50 shadow-xs w-fit">
+            ← Back to Dashboard
+          </button>
+        </div>
+
+        <!-- Registered Passes Dynamic Grid -->
+        <div id="registrations-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Rendered dynamically by dashboard.js with REAL scannable QR codes -->
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!-- ================= MODAL: DIGITAL EVENT PASS (LARGE REAL SCANNABLE QR PASS) ================= -->
+  <div id="pass-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-brandBorder animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Close Button -->
+      <button onclick="closePassModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold z-10 transition-colors">
+        ✕
+      </button>
+
+      <!-- Printable Area -->
+      <div id="printable-ticket-content">
+        <!-- Ticket Header with Event Panorama -->
+        <div class="relative h-28 overflow-hidden bg-brandNavy">
+          <img id="modal-pass-banner-img" src="/hero-campus.jpg" onerror="this.src='/assets/hero_campus.jpg'" alt="Campus" class="w-full h-full object-cover opacity-60"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-brandNavy via-brandNavy/40 to-transparent p-4 flex flex-col justify-end">
+            <span class="text-[10px] font-bold tracking-widest uppercase text-brandBlue">OFFICIAL EVENT PASS</span>
+            <h3 id="modal-pass-event-title" class="text-white font-heading font-extrabold text-base truncate">National Hackathon 2027</h3>
+          </div>
+        </div>
+
+        <!-- Ticket Body -->
+        <div class="p-6">
+          <div class="text-center">
+            
+            <!-- Real Scannable QR Code Image -->
+            <div class="w-44 h-44 mx-auto p-2 bg-white rounded-2xl border-2 border-brandNavy/15 shadow-card flex items-center justify-center">
+              <img 
+                id="modal-pass-qr-img" 
+                src="" 
+                alt="Genuine Scannable QR Code" 
+                class="w-full h-full object-contain"
+              />
+            </div>
+            
+            <p id="modal-pass-reg-id" class="text-xs font-mono text-brandNavy mt-2.5 font-bold tracking-wider">
+              REG ID: EVT-2027-001
+            </p>
+
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mt-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>VERIFIED ATTENDEE • CONFIRMED ENTRY</span>
+            </div>
+
+            <!-- Direct Verification Test Link -->
+            <div class="mt-2">
+              <a id="modal-pass-verify-link" href="#" target="_blank" class="text-[11px] font-semibold text-brandBlue hover:underline inline-flex items-center gap-1">
+                <span>Test Organiser Scanner Gate</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Attendee Details Table -->
+          <div class="mt-4 bg-slate-50 rounded-2xl p-4 space-y-2 text-xs border border-slate-100">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Attendee:</span>
+              <span id="ticket-attendee-name" class="font-bold text-brandNavy">Gautam</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Institution:</span>
+              <span id="ticket-attendee-college" class="font-medium text-brandNavy">TechVerse University</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Dates:</span>
+              <span id="ticket-attendee-date" class="font-medium text-brandNavy">15–16 Feb, 2027</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Venue:</span>
+              <span id="ticket-attendee-venue" class="font-medium text-brandNavy truncate ml-2">Main Tech Auditorium, Bengaluru</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Access:</span>
+              <span id="ticket-attendee-access" class="font-semibold text-brandBlue">Student Hacker All-Access</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="p-6 pt-0 flex gap-3">
+        <button id="modal-pass-download-btn" onclick="downloadCurrentModalPass()" class="flex-1 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <svg class="w-4 h-4 text-brandBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span>Download Ticket</span>
+        </button>
+        <button onclick="closePassModal()" class="px-5 py-2.5 rounded-xl border border-brandBorder hover:bg-slate-50 text-brandNavy text-xs font-bold transition-colors">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: EVENT DETAILS ================= -->
+  <div id="event-details-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brandBorder animate-in fade-in zoom-in-95 duration-200">
+      
+      <button onclick="closeEventDetailsModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold z-10 transition-colors">
+        ✕
+      </button>
+
+      <div class="relative h-44 overflow-hidden bg-slate-900">
+        <img id="modal-event-img" src="" alt="Event banner" class="w-full h-full object-cover opacity-80"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-brandNavy via-brandNavy/40 to-transparent p-5 flex flex-col justify-end">
+          <span id="modal-event-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold w-fit bg-white text-brandNavy mb-1.5"></span>
+          <h3 id="modal-event-title" class="font-heading font-extrabold text-xl text-white"></h3>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="flex flex-wrap items-center gap-4 text-xs text-brandSlate border-b border-brandBorder pb-3">
+          <span id="modal-event-date" class="flex items-center gap-1 font-semibold text-brandNavy"></span>
+          <span id="modal-event-location" class="flex items-center gap-1 font-semibold text-brandNavy"></span>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">About this event</h4>
+          <p id="modal-event-desc" class="text-sm text-brandNavy mt-1 leading-relaxed"></p>
+        </div>
+
+        <div class="bg-blue-50/60 rounded-xl p-3.5 text-xs text-slate-600">
+          <p class="font-bold text-brandNavy mb-1">Highlights:</p>
+          <ul class="list-disc pl-4 space-y-0.5 text-[11px]" id="modal-event-highlights">
+            <li>Interactive live coding and mentoring sessions</li>
+            <li>Free official certification and merchandise</li>
+            <li>Direct networking with hiring tech leads</li>
+          </ul>
+        </div>
+
+        <div class="pt-2 flex gap-3">
+          <button id="modal-register-btn" onclick="handleEventRegisterAction()" class="flex-1 py-3 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white text-xs font-bold transition-colors shadow-sm">
+            Confirm Registration
+          </button>
+          <button onclick="closeEventDetailsModal()" class="px-5 py-3 rounded-xl border border-brandBorder hover:bg-slate-50 text-brandNavy text-xs font-bold transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: STUDENT PROFILE ================= -->
+  <div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-brandNavy/60 backdrop-blur-sm transition-opacity">
+    <div class="relative bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-brandBorder p-6 animate-in fade-in zoom-in-95 duration-200">
+      
+      <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-brandNavy flex items-center justify-center text-sm font-bold transition-colors">
+        ✕
+      </button>
+
+      <div class="text-center pt-2 pb-4 border-b border-brandBorder">
+        <div id="profile-modal-avatar" class="w-16 h-16 rounded-full bg-[#A3664C] text-white flex items-center justify-center font-bold text-2xl mx-auto shadow-sm">
+          G
+        </div>
+        <h3 id="profile-modal-name" class="font-heading font-extrabold text-lg text-brandNavy mt-2.5">Gautam</h3>
+        <p id="profile-modal-email" class="text-xs text-brandSlate">gautam@campus.edu</p>
+        <span class="inline-block mt-2 px-3 py-0.5 rounded-full text-xs font-bold bg-brandIce text-brandNavy">
+          Verified Student
+        </span>
+      </div>
+
+      <div class="py-4 space-y-3 text-xs">
+        <div class="flex justify-between items-center py-1 border-b border-slate-100">
+          <span class="text-slate-500">College / University:</span>
+          <span id="profile-modal-college" class="font-bold text-brandNavy">TechVerse University</span>
+        </div>
+        <div class="flex justify-between items-center py-1 border-b border-slate-100">
+          <span class="text-slate-500">Student ID:</span>
+          <span class="font-mono text-slate-600">STU-2027-8910</span>
+        </div>
+        <div class="flex justify-between items-center py-1 border-b border-slate-100">
+          <span class="text-slate-500">Total Registered Events:</span>
+          <span class="font-bold text-brandNavy">4 Events</span>
+        </div>
+        <div class="flex justify-between items-center py-1 border-b border-slate-100">
+          <span class="text-slate-500">Saved Bookmarks:</span>
+          <span class="font-bold text-brandNavy">8 Events</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex gap-3">
+        <a href="/" class="flex-1 py-2.5 rounded-xl bg-brandNavy hover:bg-[#0f2038] text-white text-xs font-bold transition-colors text-center">
+          Explore More Events
+        </a>
+        <button onclick="handleLogout()" class="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-colors">
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= TOAST CONTAINER ================= -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Dashboard Controller Script -->
+  <script src="/dashboard.js"></script>
+
+</body>
+</html>
