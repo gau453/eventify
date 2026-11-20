@@ -291,20 +291,21 @@ async function handleRequest(req, res) {
 // Export request handler for Vercel / serverless environments
 module.exports = handleRequest;
 
-// Only bind to local TCP ports when run directly via "node server.js"
+// Bind to TCP port (supports Render process.env.PORT or local 3000/3001 fallback)
 if (require.main === module) {
-  const PORTS = [3000, 3001];
-  PORTS.forEach(port => {
-    const srv = http.createServer(handleRequest);
-    srv.listen(port, () => {
-      console.log(`Eventify server running at http://localhost:${port}`);
-    });
-    srv.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} occupied, skipping.`);
-      } else {
-        console.error(`Server error on port ${port}:`, err);
-      }
-    });
+  const port = parseInt(process.env.PORT, 10) || 3000;
+  const srv = http.createServer(handleRequest);
+  srv.listen(port, '0.0.0.0', () => {
+    console.log(`Eventify server running on port ${port}`);
+  });
+  srv.on('error', (err) => {
+    if (err.code === 'EADDRINUSE' && !process.env.PORT) {
+      const fallback = http.createServer(handleRequest);
+      fallback.listen(3001, () => {
+        console.log(`Eventify server running at http://localhost:3001`);
+      });
+    } else {
+      console.error(`Server error on port ${port}:`, err);
+    }
   });
 }
