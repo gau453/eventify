@@ -2,7 +2,7 @@
   "name": "eventify",
   "version": "1.0.0",
   "description": "Eventify — Modern Student-Focused Event Discovery & Organiser SaaS Platform",
-  "main": "server.js",
+  "private": true,
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",

@@ -288,18 +288,23 @@ async function handleRequest(req, res) {
   });
 }
 
-// Start Local Server on Port 3000 / 3001
-const PORTS = [3000, 3001];
-PORTS.forEach(port => {
-  const srv = http.createServer(handleRequest);
-  srv.listen(port, () => {
-    console.log(`Eventify server running at http://localhost:${port}`);
+// Export request handler for Vercel / serverless environments
+module.exports = handleRequest;
+
+// Only bind to local TCP ports when run directly via "node server.js"
+if (require.main === module) {
+  const PORTS = [3000, 3001];
+  PORTS.forEach(port => {
+    const srv = http.createServer(handleRequest);
+    srv.listen(port, () => {
+      console.log(`Eventify server running at http://localhost:${port}`);
+    });
+    srv.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${port} occupied, skipping.`);
+      } else {
+        console.error(`Server error on port ${port}:`, err);
+      }
+    });
   });
-  srv.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} occupied, skipping.`);
-    } else {
-      console.error(`Server error on port ${port}:`, err);
-    }
-  });
-});
+}
